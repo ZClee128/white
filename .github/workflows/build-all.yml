@@ -21,6 +21,14 @@ on:
         options:
           - 'true'
           - 'false'
+      submit_for_review:
+        description: '是否自动提交苹果审核 (需要配置 API Key)'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 jobs:
   # 解析项目路径和 bundle_id（ubuntu，不消耗 macOS 时间）
@@ -251,28 +259,70 @@ jobs:
           fi
           rm -rf "$TEMP_DIR"
 
-      - name: 📤 Upload to App Store Connect
+      - name: 📤 Upload & Submit to App Store Connect
         if: ${{ github.event.inputs.upload_to_appstore == 'true' }}
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+          # App Store Connect API Key (用于提审)
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY_CONTENT: ${{ secrets.ASC_API_KEY_CONTENT }}
         run: |
           IPA_FILE=$(find $EXPORT_PATH -name "*.ipa" -type f | head -1)
 
-          if [ -z "$APPLE_ID" ] || [ -z "$APP_SPECIFIC_PASSWORD" ]; then
-            echo "❌ APPLE_ID 或 APP_SPECIFIC_PASSWORD 未配置"
-            exit 1
+          if [ "${{ github.event.inputs.submit_for_review }}" == 'true' ]; then
+            if [ -z "$ASC_API_KEY_ID" ] || [ -z "$ASC_API_ISSUER_ID" ] || [ -z "$ASC_API_KEY_CONTENT" ]; then
+              echo "❌ 使用直接提审功能必须在相关 Environment 或 Secrets 中配置 App Store Connect API Key："
+              echo "需要: ASC_API_KEY_ID, ASC_API_KEY_ISSUER_ID, ASC_API_KEY_CONTENT"
+              exit 1
+            fi
+            
+            echo "🚀 Uploading & Submitting for Review via Fastlane..."
+            
+            # 临时生成 Fastfile
+            cat > Fastfile <<EOF
+            lane :upload_and_submit do
+              api_key = app_store_connect_api_key(
+                key_id: ENV["ASC_API_KEY_ID"],
+                issuer_id: ENV["ASC_API_ISSUER_ID"],
+                key_content: ENV["ASC_API_KEY_CONTENT"]
+              )
+              deliver(
+                api_key: api_key,
+                ipa: ENV["IPA_FILE_PATH"],
+                app_identifier: "${{ needs.resolve.outputs.bundle_id }}",
+                force: true,
+                skip_screenshots: true,
+                skip_metadata: true,
+                submit_for_review: true,
+                automatic_release: true,
+                phased_release: true
+              )
+            end
+            EOF
+            
+            export IPA_FILE_PATH="$IPA_FILE"
+            fastlane upload_and_submit
+            rm Fastfile
+            
+          else
+            # 原有的仅上传逻辑（使用 altool）
+            if [ -z "$APPLE_ID" ] || [ -z "$APP_SPECIFIC_PASSWORD" ]; then
+              echo "❌ APPLE_ID 或 APP_SPECIFIC_PASSWORD 未配置"
+              exit 1
+            fi
+
+            echo "🚀 Uploading to App Store Connect (No Review Submission)..."
+            xcrun altool --upload-app \
+              --file "$IPA_FILE" \
+              --type ios \
+              --username "$APPLE_ID" \
+              --password "$APP_SPECIFIC_PASSWORD" \
+              --verbose
           fi
 
-          echo "🚀 Uploading to App Store Connect..."
-          xcrun altool --upload-app \
-            --file "$IPA_FILE" \
-            --type ios \
-            --username "$APPLE_ID" \
-            --password "$APP_SPECIFIC_PASSWORD" \
-            --verbose
-
-          echo "✓ Upload completed"
+          echo "✓ Completed"
 
       - name: 📦 Save IPA as Artifact
         uses: actions/upload-artifact@v4
