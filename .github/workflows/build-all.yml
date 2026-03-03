@@ -280,27 +280,25 @@ jobs:
             
             echo "🚀 Uploading & Submitting for Review via Fastlane..."
             
-            # 临时生成 Fastfile
-            cat > Fastfile <<-EOF
-            lane :upload_and_submit do
-              api_key = app_store_connect_api_key(
-                key_id: ENV["ASC_API_KEY_ID"],
-                issuer_id: ENV["ASC_API_ISSUER_ID"],
-                key_content: ENV["ASC_API_KEY_CONTENT"]
-              )
-              deliver(
-                api_key: api_key,
-                ipa: ENV["IPA_FILE_PATH"],
-                app_identifier: "${{ needs.resolve.outputs.bundle_id }}",
-                force: true,
-                skip_screenshots: true,
-                skip_metadata: true,
-                submit_for_review: true,
-                automatic_release: true,
-                phased_release: true
-              )
-            end
-            EOF
+            # 临时生成 Fastfile (避免 EOF 破坏 yaml 缩进，用 echo 追加)
+            echo "lane :upload_and_submit do" > Fastfile
+            echo "  api_key = app_store_connect_api_key(" >> Fastfile
+            echo "    key_id: ENV[\"ASC_API_KEY_ID\"]," >> Fastfile
+            echo "    issuer_id: ENV[\"ASC_API_ISSUER_ID\"]," >> Fastfile
+            echo "    key_content: ENV[\"ASC_API_KEY_CONTENT\"]" >> Fastfile
+            echo "  )" >> Fastfile
+            echo "  deliver(" >> Fastfile
+            echo "    api_key: api_key," >> Fastfile
+            echo "    ipa: ENV[\"IPA_FILE_PATH\"]," >> Fastfile
+            echo "    app_identifier: \"${{ needs.resolve.outputs.bundle_id }}\"," >> Fastfile
+            echo "    force: true," >> Fastfile
+            echo "    skip_screenshots: true," >> Fastfile
+            echo "    skip_metadata: true," >> Fastfile
+            echo "    submit_for_review: true," >> Fastfile
+            echo "    automatic_release: true," >> Fastfile
+            echo "    phased_release: true" >> Fastfile
+            echo "  )" >> Fastfile
+            echo "end" >> Fastfile
             
             export IPA_FILE_PATH="$IPA_FILE"
             fastlane upload_and_submit
