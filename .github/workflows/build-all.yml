@@ -280,29 +280,33 @@ jobs:
             
             echo "🚀 Uploading & Submitting for Review via Fastlane..."
             
-            # 临时生成 Fastfile (避免 EOF 破坏 yaml 缩进，用 echo 追加)
-            echo "lane :upload_and_submit do" > Fastfile
-            echo "  api_key = app_store_connect_api_key(" >> Fastfile
-            echo "    key_id: ENV[\"ASC_API_KEY_ID\"]," >> Fastfile
-            echo "    issuer_id: ENV[\"ASC_API_ISSUER_ID\"]," >> Fastfile
-            echo "    key_content: ENV[\"ASC_API_KEY_CONTENT\"]" >> Fastfile
-            echo "  )" >> Fastfile
-            echo "  deliver(" >> Fastfile
-            echo "    api_key: api_key," >> Fastfile
-            echo "    ipa: ENV[\"IPA_FILE_PATH\"]," >> Fastfile
-            echo "    app_identifier: \"${{ needs.resolve.outputs.bundle_id }}\"," >> Fastfile
-            echo "    force: true," >> Fastfile
-            echo "    skip_screenshots: true," >> Fastfile
-            echo "    skip_metadata: true," >> Fastfile
-            echo "    submit_for_review: true," >> Fastfile
-            echo "    automatic_release: true," >> Fastfile
-            echo "    phased_release: true" >> Fastfile
-            echo "  )" >> Fastfile
-            echo "end" >> Fastfile
+            # 创建 fastlane 目录，否则 fastlane 在 CI 找不到文件夹会尝试弹框提示初始化从而导致崩溃
+            mkdir -p fastlane
+            
+            # 手动生成 Fastfile
+            echo "opt_out_usage" > fastlane/Fastfile
+            echo "lane :upload_and_submit do" >> fastlane/Fastfile
+            echo "  api_key = app_store_connect_api_key(" >> fastlane/Fastfile
+            echo "    key_id: ENV[\"ASC_API_KEY_ID\"]," >> fastlane/Fastfile
+            echo "    issuer_id: ENV[\"ASC_API_ISSUER_ID\"]," >> fastlane/Fastfile
+            echo "    key_content: ENV[\"ASC_API_KEY_CONTENT\"]" >> fastlane/Fastfile
+            echo "  )" >> fastlane/Fastfile
+            echo "  deliver(" >> fastlane/Fastfile
+            echo "    api_key: api_key," >> fastlane/Fastfile
+            echo "    ipa: ENV[\"IPA_FILE_PATH\"]," >> fastlane/Fastfile
+            echo "    app_identifier: \"${{ needs.resolve.outputs.bundle_id }}\"," >> fastlane/Fastfile
+            echo "    force: true," >> fastlane/Fastfile
+            echo "    skip_screenshots: true," >> fastlane/Fastfile
+            echo "    skip_metadata: true," >> fastlane/Fastfile
+            echo "    submit_for_review: true," >> fastlane/Fastfile
+            echo "    automatic_release: true," >> fastlane/Fastfile
+            echo "    phased_release: true" >> fastlane/Fastfile
+            echo "  )" >> fastlane/Fastfile
+            echo "end" >> fastlane/Fastfile
             
             export IPA_FILE_PATH="$IPA_FILE"
             fastlane upload_and_submit
-            rm Fastfile
+            rm -rf fastlane
             
           else
             # 原有的仅上传逻辑（使用 altool）
