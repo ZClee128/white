@@ -2,7 +2,7 @@ name: Build iOS Project
 
 # 使用方式：
 # GitHub Actions → Build iOS Project → Run workflow
-# 填入项目 scheme 名称，系统自动加载对应账号的证书和配置
+# 填入项目 scheme 名称，系统自动加载对应 Environment 的证书和账号
 
 on:
   workflow_dispatch:
@@ -23,19 +23,18 @@ on:
           - 'false'
 
 jobs:
+  # 解析项目路径和 bundle_id（ubuntu，不消耗 macOS 时间）
   resolve:
     name: Resolve Project Info
     runs-on: ubuntu-latest
     outputs:
       working_directory: ${{ steps.resolve.outputs.working_directory }}
       project_name: ${{ steps.resolve.outputs.project_name }}
-      scheme_name: ${{ steps.resolve.outputs.scheme_name }}
       bundle_id: ${{ steps.resolve.outputs.bundle_id }}
-      provisioning_profile_name: ${{ steps.resolve.outputs.provisioning_profile_name }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Resolve project path and bundle_id
+      - name: Resolve project path
         id: resolve
         run: |
           SCHEME="${{ github.event.inputs.project }}"
@@ -50,41 +49,219 @@ jobs:
 
           WORKDIR=$(dirname "$PROJ_PATH")
           WORKDIR="${WORKDIR#./}"
-          PROJECT_NAME="${SCHEME}.xcodeproj"
 
           PBXPROJ="${PROJ_PATH}/project.pbxproj"
           BUNDLE_ID=""
           if [ -f "$PBXPROJ" ]; then
             BUNDLE_ID=$(grep -m1 "PRODUCT_BUNDLE_IDENTIFIER" "$PBXPROJ" | sed 's/.*= //;s/;//;s/ //')
           fi
-
-          if [ -z "$BUNDLE_ID" ]; then
-            BUNDLE_ID="com.placeholder.${SCHEME}"
-          fi
+          [ -z "$BUNDLE_ID" ] && BUNDLE_ID="com.placeholder.${SCHEME}"
 
           echo "working_directory=$WORKDIR" >> $GITHUB_OUTPUT
-          echo "project_name=$PROJECT_NAME" >> $GITHUB_OUTPUT
-          echo "scheme_name=$SCHEME" >> $GITHUB_OUTPUT
+          echo "project_name=${SCHEME}.xcodeproj" >> $GITHUB_OUTPUT
           echo "bundle_id=$BUNDLE_ID" >> $GITHUB_OUTPUT
-          echo "provisioning_profile_name=$SCHEME" >> $GITHUB_OUTPUT
 
-          echo "✅ 项目路径: $WORKDIR/$PROJECT_NAME"
+          echo "✅ 项目路径: $WORKDIR/${SCHEME}.xcodeproj"
           echo "✅ Bundle ID: $BUNDLE_ID"
-          echo "✅ Environment: $SCHEME"
 
+  # 打包构建（environment 直接对应项目名，Secrets 从该 Environment 读取）
   build:
-    name: Build ${{ needs.resolve.outputs.scheme_name }}
+    name: Build ${{ github.event.inputs.project }}
     needs: resolve
-    uses: ./.github/workflows/reusable-ios-build.yml
-    with:
-      working_directory: ${{ needs.resolve.outputs.working_directory }}
-      project_name: ${{ needs.resolve.outputs.project_name }}
-      scheme_name: ${{ needs.resolve.outputs.scheme_name }}
-      bundle_id: ${{ needs.resolve.outputs.bundle_id }}
-      provisioning_profile_name: ${{ needs.resolve.outputs.provisioning_profile_name }}
-      # environment_name 与 scheme 同名，对应 GitHub 上配置的 Environment
-      # 每个 Environment 存储该项目独立的 Apple 账号和证书
-      environment_name: ${{ github.event.inputs.project }}
-      configuration: 'Release'
-      xcode_version: 'latest-stable'
-      upload_to_appstore: ${{ github.event.inputs.upload_to_appstore == 'true' }}
+    runs-on: macos-latest
+    environment: ${{ github.event.inputs.project }}
+
+    steps:
+      - name: 🌐 Check Build Environment
+        run: |
+          echo "Project: ${{ github.event.inputs.project }}"
+          curl -s https://ipinfo.io/json || echo "⚠️ Unable to reach ipinfo.io"
+
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: 🧹 Clean Build Environment
+        working-directory: ${{ needs.resolve.outputs.working_directory }}
+        run: |
+          find . -name "xcuserdata" -type d -exec rm -rf {} + 2>/dev/null || true
+          find . -name "*.xcuserstate" -type f -delete 2>/dev/null || true
+          find . -name "*.pbxuser" -type f -delete 2>/dev/null || true
+          find . -name ".DS_Store" -type f -delete 2>/dev/null || true
+          rm -rf ~/Library/Developer/Xcode/DerivedData/*
+          rm -rf build/
+          echo "✓ Build environment cleaned"
+
+      - name: 🔐 Import Certificates and Provisioning Profile
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          if [ -z "$BUILD_CERTIFICATE_BASE64" ]; then
+            echo "❌ Secret BUILD_CERTIFICATE_BASE64 未配置（Environment: ${{ github.event.inputs.project }}）"
+            exit 1
+          fi
+          if [ -z "$BUILD_PROVISION_PROFILE_BASE64" ]; then
+            echo "❌ Secret BUILD_PROVISION_PROFILE_BASE64 未配置（Environment: ${{ github.event.inputs.project }}）"
+            exit 1
+          fi
+
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          if [ ! -s "$CERTIFICATE_PATH" ]; then
+            echo "❌ 证书 base64 解码失败，内容为空"
+            exit 1
+          fi
+
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          PROVISION_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PROVISION_PATH
+          if [ ! -s "$PROVISION_PATH" ]; then
+            echo "❌ 描述文件 base64 解码失败，内容为空"
+            exit 1
+          fi
+
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $PROVISION_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
+          echo "✓ Certificates and profile imported"
+
+      - name: 📝 Get Provisioning Profile UUID
+        run: |
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< $(security cms -D -i $PP_PATH))
+          echo "PP_UUID=$UUID" >> $GITHUB_ENV
+          echo "Found UUID: $UUID"
+
+      - name: 🏗️ Build Archive
+        working-directory: ${{ needs.resolve.outputs.working_directory }}
+        run: |
+          ARCHIVE_PATH="$RUNNER_TEMP/app.xcarchive"
+
+          xcodebuild archive \
+            -project "${{ needs.resolve.outputs.project_name }}" \
+            -scheme "${{ github.event.inputs.project }}" \
+            -configuration Release \
+            -archivePath "$ARCHIVE_PATH" \
+            -destination 'generic/platform=iOS' \
+            APP_PROFILE="$PP_UUID" \
+            DEVELOPMENT_TEAM="${{ secrets.TEAM_ID }}"
+
+          echo "ARCHIVE_PATH=$ARCHIVE_PATH" >> $GITHUB_ENV
+
+          [ -d "$ARCHIVE_PATH" ] && echo "✓ Archive created" || { echo "❌ Archive failed"; exit 1; }
+
+      - name: 📤 Export IPA
+        run: |
+          EXPORT_PATH="$RUNNER_TEMP/export"
+          EXPORT_OPTIONS_PATH="$RUNNER_TEMP/ExportOptions.plist"
+
+          cat > "$EXPORT_OPTIONS_PATH" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store</string>
+              <key>uploadBitcode</key>
+              <false/>
+              <key>uploadSymbols</key>
+              <true/>
+              <key>compileBitcode</key>
+              <false/>
+              <key>stripSwiftSymbols</key>
+              <true/>
+              <key>teamID</key>
+              <string>${{ secrets.TEAM_ID }}</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>${{ needs.resolve.outputs.bundle_id }}</key>
+                  <string>${{ github.event.inputs.project }}</string>
+              </dict>
+              <key>signingCertificate</key>
+              <string>Apple Distribution</string>
+              <key>signingStyle</key>
+              <string>manual</string>
+          </dict>
+          </plist>
+          EOF
+
+          echo "EXPORT_PATH=$EXPORT_PATH" >> $GITHUB_ENV
+
+          xcodebuild -exportArchive \
+            -archivePath "$ARCHIVE_PATH" \
+            -exportOptionsPlist "$EXPORT_OPTIONS_PATH" \
+            -exportPath "$EXPORT_PATH"
+
+          echo "✓ IPA exported"
+          ls -lh "$EXPORT_PATH"/*.ipa
+
+      - name: 🔍 Validate IPA
+        run: |
+          IPA_FILE=$(find $RUNNER_TEMP/export -name "*.ipa" -type f | head -1)
+          TEMP_DIR=$(mktemp -d)
+          unzip -q "$IPA_FILE" -d "$TEMP_DIR"
+
+          PROFILE=$(find "$TEMP_DIR" -name "embedded.mobileprovision" | head -1)
+          if [ -f "$PROFILE" ]; then
+            security cms -D -i "$PROFILE" > "$TEMP_DIR/profile.plist"
+            if /usr/libexec/PlistBuddy -c "Print :ProvisionedDevices" "$TEMP_DIR/profile.plist" > /dev/null 2>&1; then
+              echo "❌ Profile contains device list! Use a Distribution certificate."
+              exit 1
+            else
+              echo "✓ Profile validation passed"
+            fi
+          fi
+          rm -rf "$TEMP_DIR"
+
+      - name: 📤 Upload to App Store Connect
+        if: ${{ github.event.inputs.upload_to_appstore == 'true' }}
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        run: |
+          IPA_FILE=$(find $EXPORT_PATH -name "*.ipa" -type f | head -1)
+
+          if [ -z "$APPLE_ID" ] || [ -z "$APP_SPECIFIC_PASSWORD" ]; then
+            echo "❌ APPLE_ID 或 APP_SPECIFIC_PASSWORD 未配置"
+            exit 1
+          fi
+
+          echo "🚀 Uploading to App Store Connect..."
+          xcrun altool --upload-app \
+            --file "$IPA_FILE" \
+            --type ios \
+            --username "$APPLE_ID" \
+            --password "$APP_SPECIFIC_PASSWORD" \
+            --verbose
+
+          echo "✓ Upload completed"
+
+      - name: 📦 Save IPA as Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ github.event.inputs.project }}-ipa
+          path: ${{ env.EXPORT_PATH }}/*.ipa
+          retention-days: 7
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
+          rm -f $RUNNER_TEMP/build_certificate.p12
+          rm -f $RUNNER_TEMP/build_pp.mobileprovision
+          echo "✓ Cleanup complete"
