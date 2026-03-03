@@ -203,45 +203,21 @@ jobs:
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
-          API_KEY_ID: ${{ secrets.API_KEY_ID }}
-          API_ISSUER_ID: ${{ secrets.API_ISSUER_ID }}
-          API_PRIVATE_KEY: ${{ secrets.API_PRIVATE_KEY }}
         run: |
           IPA_FILE=$(find ${{ env.EXPORT_PATH }} -name "*.ipa" -type f | head -1)
 
-          if [ -n "$API_KEY_ID" ] && [ -n "$API_ISSUER_ID" ] && [ -n "$API_PRIVATE_KEY" ]; then
-            echo "🔑 Using API Key authentication"
-
-            mkdir -p ~/.private_keys
-
-            if echo "$API_PRIVATE_KEY" | grep -q "BEGIN PRIVATE KEY"; then
-              echo "$API_PRIVATE_KEY" > ~/.private_keys/AuthKey_${API_KEY_ID}.p8
-            else
-              echo "$API_PRIVATE_KEY" | base64 --decode > ~/.private_keys/AuthKey_${API_KEY_ID}.p8
-            fi
-
-            xcrun altool --upload-app \
-              --file "$IPA_FILE" \
-              --type ios \
-              --apiKey "$API_KEY_ID" \
-              --apiIssuer "$API_ISSUER_ID" \
-              --verbose
-
-            rm -f ~/.private_keys/AuthKey_${API_KEY_ID}.p8
-
-          elif [ -n "$APPLE_ID" ] && [ -n "$APP_SPECIFIC_PASSWORD" ]; then
-            echo "⚠️ Falling back to Apple ID + App-Specific Password"
-
-            xcrun altool --upload-app \
-              --file "$IPA_FILE" \
-              --type ios \
-              --username "$APPLE_ID" \
-              --password "$APP_SPECIFIC_PASSWORD" \
-              --verbose
-          else
-            echo "❌ No upload credentials configured"
+          if [ -z "$APPLE_ID" ] || [ -z "$APP_SPECIFIC_PASSWORD" ]; then
+            echo "❌ APPLE_ID 或 APP_SPECIFIC_PASSWORD 未配置"
             exit 1
           fi
+
+          echo "🚀 Uploading to App Store Connect..."
+          xcrun altool --upload-app \
+            --file "$IPA_FILE" \
+            --type ios \
+            --username "$APPLE_ID" \
+            --password "$APP_SPECIFIC_PASSWORD" \
+            --verbose
 
           echo "✓ Upload completed"
 
