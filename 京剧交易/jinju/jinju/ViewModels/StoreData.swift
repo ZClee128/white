@@ -14,16 +14,12 @@ class StoreData: ObservableObject {
         didSet { saveUserData() }
     }
     
-    @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
-    @AppStorage("currentUserPhone") var currentUserPhone: String = ""
-    
     private let userDefaults = UserDefaults.standard
+    private var isRestoring = false
     
     init() {
         loadData()
-        if isLoggedIn && !currentUserPhone.isEmpty {
-            restoreUserData()
-        }
+        restoreUserData()
     }
     
     func loadData() {
@@ -46,56 +42,49 @@ class StoreData: ObservableObject {
     
     // MARK: - Local Database Persistence
     
-    private var cartKey: String { "cart_\(currentUserPhone)" }
-    private var ordersKey: String { "orders_\(currentUserPhone)" }
-    private var addressesKey: String { "addresses_\(currentUserPhone)" }
+    private var cartKey: String { "local_cart" }
+    private var ordersKey: String { "local_orders" }
+    private var addressesKey: String { "local_addresses" }
     
     private func saveUserData() {
-        guard isLoggedIn, !currentUserPhone.isEmpty else { return }
-        if let encodedCart = try? JSONEncoder().encode(cart) { userDefaults.set(encodedCart, forKey: cartKey) }
-        if let encodedOrders = try? JSONEncoder().encode(orders) { userDefaults.set(encodedOrders, forKey: ordersKey) }
-        if let encodedAddresses = try? JSONEncoder().encode(addresses) { userDefaults.set(encodedAddresses, forKey: addressesKey) }
+        guard !isRestoring else { return }
+        do {
+            let encodedCart = try JSONEncoder().encode(cart)
+            userDefaults.set(encodedCart, forKey: cartKey)
+            
+            let encodedOrders = try JSONEncoder().encode(orders)
+            userDefaults.set(encodedOrders, forKey: ordersKey)
+            
+            let encodedAddresses = try JSONEncoder().encode(addresses)
+            userDefaults.set(encodedAddresses, forKey: addressesKey)
+            
+            userDefaults.synchronize()
+        } catch {
+            print("Error encoding user data: \(error)")
+        }
     }
     
     private func restoreUserData() {
-        if let cartData = userDefaults.data(forKey: cartKey), let decodedCart = try? JSONDecoder().decode([Figure].self, from: cartData) {
-            cart = decodedCart
-        } else { cart = [] }
-        
-        if let ordersData = userDefaults.data(forKey: ordersKey), let decodedOrders = try? JSONDecoder().decode([Order].self, from: ordersData) {
-            orders = decodedOrders
-        } else { orders = [] }
-        
-        if let addressData = userDefaults.data(forKey: addressesKey), let decodedAddress = try? JSONDecoder().decode([Address].self, from: addressData) {
-            addresses = decodedAddress
-        } else { addresses = [] }
+        isRestoring = true
+        defer { isRestoring = false }
+        do {
+            if let cartData = userDefaults.data(forKey: cartKey) {
+                cart = try JSONDecoder().decode([Figure].self, from: cartData)
+            } else { cart = [] }
+            
+            if let ordersData = userDefaults.data(forKey: ordersKey) {
+                orders = try JSONDecoder().decode([Order].self, from: ordersData)
+            } else { orders = [] }
+            
+            if let addressData = userDefaults.data(forKey: addressesKey) {
+                addresses = try JSONDecoder().decode([Address].self, from: addressData)
+            } else { addresses = [] }
+        } catch {
+            print("Error decoding user data: \(error)")
+        }
     }
     
     // MARK: - Actions
-    
-    func login(phone: String) {
-        currentUserPhone = phone
-        isLoggedIn = true
-        restoreUserData() // Fetch this user's persistent data
-    }
-    
-    // Soft logout: memory cleared, but persistent data remains
-    func logout() {
-        isLoggedIn = false
-        currentUserPhone = ""
-        cart.removeAll()
-        orders.removeAll()
-        addresses.removeAll()
-    }
-    
-    // Hard delete: remove permanent data
-    func deleteAccount() {
-        userDefaults.removeObject(forKey: cartKey)
-        userDefaults.removeObject(forKey: ordersKey)
-        userDefaults.removeObject(forKey: addressesKey)
-        logout()
-    }
-    
     func addAddress(_ address: Address) {
         if address.isDefault {
             for i in 0..<addresses.count {
@@ -121,9 +110,9 @@ class StoreData: ObservableObject {
         cart.reduce(0) { $0 + $1.price }
     }
     
-    func checkout(address: Address, paymentMethod: String) {
+    func checkout(address: Address, paymentMethod: String, status: String = "Completed") {
         guard !cart.isEmpty else { return }
-        let order = Order(items: cart, total: cartTotal, date: Date(), address: address, paymentMethod: paymentMethod)
+        let order = Order(items: cart, total: cartTotal, date: Date(), address: address, paymentMethod: paymentMethod, status: status)
         orders.insert(order, at: 0) // Newest first
         cart.removeAll()
     }
@@ -136,4 +125,5 @@ struct Order: Identifiable, Codable, Equatable {
     let date: Date
     let address: Address
     let paymentMethod: String
+    var status: String = "Completed"
 }

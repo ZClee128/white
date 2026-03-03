@@ -21,9 +21,9 @@ struct MainTabView: View {
                 }
                 .badge(store.cart.count > 0 ? "\(store.cart.count)" : nil)
             
-            ProfileView()
+            SettingsView()
                 .tabItem {
-                    Label("Profile", systemImage: "person.fill")
+                    Label("Settings", systemImage: "gearshape.fill")
                 }
         }
         .environmentObject(store)

@@ -2,34 +2,11 @@ import SwiftUI
 
 struct CartView: View {
     @EnvironmentObject var store: StoreData
-    @State private var showingLogin = false
     
     var body: some View {
         NavigationView {
             Group {
-                if !store.isLoggedIn {
-                    VStack(spacing: 20) {
-                        Image(systemName: "lock.shield")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 80, height: 80)
-                            .foregroundColor(.gray.opacity(0.5))
-                        
-                        Text("Please login to view cart")
-                            .font(.headline)
-                            .foregroundColor(.secondary)
-                        
-                        Button(action: { showingLogin = true }) {
-                            Text("Login")
-                                .font(.headline)
-                                .foregroundColor(.red)
-                                .padding(.horizontal, 30)
-                                .padding(.vertical, 10)
-                                .background(Color.red.opacity(0.1))
-                                .cornerRadius(20)
-                        }
-                    }
-                } else if store.cart.isEmpty {
+                if store.cart.isEmpty {
                     VStack(spacing: 20) {
                         Image(systemName: "cart.badge.minus")
                             .resizable()
@@ -73,7 +50,7 @@ struct CartView: View {
             }
             .navigationTitle("Cart")
             .safeAreaInset(edge: .bottom) {
-                if store.isLoggedIn && !store.cart.isEmpty {
+                if !store.cart.isEmpty {
                     VStack {
                         Divider()
                         HStack {
@@ -100,9 +77,6 @@ struct CartView: View {
                     }
                     .background(.ultraThinMaterial)
                 }
-            }
-            .sheet(isPresented: $showingLogin) {
-                LoginView()
             }
         }
     }

@@ -104,22 +104,26 @@ struct CheckoutView: View {
             selectedAddress = store.addresses.first(where: { $0.isDefault }) ?? store.addresses.first
         }
     }
-    .alert("WeChat Not Installed", isPresented: $showWeChatAlert) {
-        Button("Back", role: .cancel) { }
+    .alert("Payment Pending", isPresented: $showWeChatAlert) {
+        Button("OK", role: .cancel) {
+            presentationMode.wrappedValue.dismiss()
+        }
     } message: {
-        Text("Secure payment requires WeChat. Please install WeChat from the App Store and try again.")
+        Text("WeChat is not detected on your device. Your order has been created with a 'Pending Payment' status. You can view it in your Settings.")
     }
 }
 
 @State private var showWeChatAlert = false
 
 private func simulatePayment() {
-    guard selectedAddress != nil else { return }
+    guard let address = selectedAddress else { return }
     
     isPaying = true
     // Simulate network delay to verify risk/status
     DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
         self.isPaying = false
+        // Create order with "Pending Payment" status
+        self.store.checkout(address: address, paymentMethod: "WeChat Pay", status: "Pending Payment")
         self.showWeChatAlert = true
     }
 }

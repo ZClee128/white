@@ -5,7 +5,6 @@ struct DetailView: View {
     @EnvironmentObject var store: StoreData
     
     @State private var showingAlert = false
-    @State private var showingLogin = false
     
     var body: some View {
         ScrollView {
@@ -99,12 +98,8 @@ struct DetailView: View {
             // Action button anchored at the bottom with UltraThin blur
             VStack {
                 Button(action: {
-                    if store.isLoggedIn {
-                        store.addToCart(figure)
-                        showingAlert = true
-                    } else {
-                        showingLogin = true
-                    }
+                    store.addToCart(figure)
+                    showingAlert = true
                 }) {
                     Text("Add to Cart")
                         .font(.headline)
@@ -122,9 +117,6 @@ struct DetailView: View {
         }
         .alert("Added to Cart", isPresented: $showingAlert) {
             Button("Continue Shopping", role: .cancel) { }
-        }
-        .sheet(isPresented: $showingLogin) {
-            LoginView()
         }
     }
 }
