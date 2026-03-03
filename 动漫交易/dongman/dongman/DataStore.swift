@@ -119,6 +119,11 @@ class DataStore: ObservableObject {
                    description: "Luffy with straw hat, meat accessory, and Gear 4 face plate. Pirate King vibes included. Box mint sealed.",
                    category: .nendoroid, stock: 6, isFlashSale: true),
         ]
+        
+        let blocked = blockedSellerIDs
+        let reported = reportedFigureIDs
+        
+        figures = figures.filter { !blocked.contains($0.seller.id.uuidString) && !reported.contains($0.id.uuidString) }
     }
 
     // MARK: - Sample Orders
@@ -167,5 +172,41 @@ class DataStore: ObservableObject {
 
     func flashSaleFigures() -> [Figure] {
         figures.filter { $0.isFlashSale }
+    }
+
+    // MARK: - UGC Moderation
+    
+    private var blockedSellerIDs: Set<String> {
+        get {
+            let array = UserDefaults.standard.stringArray(forKey: "blockedSellers") ?? []
+            return Set(array)
+        }
+        set {
+            UserDefaults.standard.set(Array(newValue), forKey: "blockedSellers")
+        }
+    }
+    
+    private var reportedFigureIDs: Set<String> {
+        get {
+            let array = UserDefaults.standard.stringArray(forKey: "reportedFigures") ?? []
+            return Set(array)
+        }
+        set {
+            UserDefaults.standard.set(Array(newValue), forKey: "reportedFigures")
+        }
+    }
+    
+    func reportFigure(_ figure: Figure) {
+        var reported = reportedFigureIDs
+        reported.insert(figure.id.uuidString)
+        reportedFigureIDs = reported
+        figures.removeAll(where: { $0.id == figure.id })
+    }
+    
+    func blockSeller(_ seller: Seller) {
+        var blocked = blockedSellerIDs
+        blocked.insert(seller.id.uuidString)
+        blockedSellerIDs = blocked
+        figures.removeAll(where: { $0.seller.id == seller.id })
     }
 }

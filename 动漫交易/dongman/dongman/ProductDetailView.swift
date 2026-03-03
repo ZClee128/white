@@ -6,6 +6,9 @@ struct ProductDetailView: View {
     @EnvironmentObject var addressStore: AddressStore
     @State private var showCheckout: Bool = false
     @State private var showMessage: Bool = false
+    @State private var showReportAlert: Bool = false
+    @State private var showBlockAlert: Bool = false
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
         ZStack {
@@ -54,6 +57,44 @@ struct ProductDetailView: View {
         }
         .sheet(isPresented: $showMessage) {
             MessagesView(sellerName: figure.seller.name)
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button(role: .destructive) {
+                        showReportAlert = true
+                    } label: {
+                        Label("Report Product", systemImage: "exclamationmark.triangle")
+                    }
+                    
+                    Button(role: .destructive) {
+                        showBlockAlert = true
+                    } label: {
+                        Label("Block Seller", systemImage: "nosign")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                        .foregroundColor(.white)
+                }
+            }
+        }
+        .alert("Report Product", isPresented: $showReportAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Report", role: .destructive) {
+                store.reportFigure(figure)
+                dismiss()
+            }
+        } message: {
+            Text("Are you sure you want to report this product? Our team will review it within 24 hours.")
+        }
+        .alert("Block Seller", isPresented: $showBlockAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Block", role: .destructive) {
+                store.blockSeller(figure.seller)
+                dismiss()
+            }
+        } message: {
+            Text("Are you sure you want to block this seller? Their products will no longer appear in your feed.")
         }
     }
 
