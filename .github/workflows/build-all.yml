@@ -298,6 +298,8 @@ jobs:
             echo "    force: true," >> fastlane/Fastfile
             echo "    skip_screenshots: true," >> fastlane/Fastfile
             echo "    skip_metadata: true," >> fastlane/Fastfile
+            echo "    run_precheck_before_submit: false," >> fastlane/Fastfile
+            echo "    precheck_include_in_app_purchases: false," >> fastlane/Fastfile
             echo "    submit_for_review: true," >> fastlane/Fastfile
             echo "    automatic_release: true," >> fastlane/Fastfile
             echo "    phased_release: true" >> fastlane/Fastfile
