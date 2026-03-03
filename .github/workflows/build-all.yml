@@ -146,11 +146,24 @@ jobs:
           echo "PP_UUID=$UUID" >> $GITHUB_ENV
           echo "Found UUID: $UUID"
 
+      - name: 🔍 Diagnose Signing Environment
+        run: |
+          echo "=== Available signing identities ==="
+          security find-identity -v -p codesigning || echo "(none found)"
+          echo ""
+          echo "=== Installed Provisioning Profiles ==="
+          ls ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || echo "(none found)"
+          echo ""
+          echo "=== PP_UUID: $PP_UUID ==="
+          echo "=== TEAM_ID: ${{ secrets.TEAM_ID }} ==="
+
       - name: 🏗️ Build Archive
         working-directory: ${{ needs.resolve.outputs.working_directory }}
         run: |
           ARCHIVE_PATH="$RUNNER_TEMP/app.xcarchive"
+          LOG_PATH="$RUNNER_TEMP/xcodebuild.log"
 
+          set -o pipefail
           xcodebuild archive \
             -project "${{ needs.resolve.outputs.project_name }}" \
             -scheme "${{ github.event.inputs.project }}" \
@@ -158,11 +171,20 @@ jobs:
             -archivePath "$ARCHIVE_PATH" \
             -destination 'generic/platform=iOS' \
             APP_PROFILE="$PP_UUID" \
-            DEVELOPMENT_TEAM="${{ secrets.TEAM_ID }}"
+            DEVELOPMENT_TEAM="${{ secrets.TEAM_ID }}" \
+            2>&1 | tee "$LOG_PATH"
+
+          EXIT_CODE=${PIPESTATUS[0]}
+
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo ""
+            echo "❌ Archive failed (exit code $EXIT_CODE). Last 50 lines of log:"
+            tail -50 "$LOG_PATH"
+            exit $EXIT_CODE
+          fi
 
           echo "ARCHIVE_PATH=$ARCHIVE_PATH" >> $GITHUB_ENV
-
-          [ -d "$ARCHIVE_PATH" ] && echo "✓ Archive created" || { echo "❌ Archive failed"; exit 1; }
+          echo "✓ Archive created"
 
       - name: 📤 Export IPA
         run: |
