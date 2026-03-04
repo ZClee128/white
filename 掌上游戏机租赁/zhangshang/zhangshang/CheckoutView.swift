@@ -125,15 +125,15 @@ struct CheckoutView: View {
                 }
                 
                 Section {
-                    Button(action: processWeChatPay) {
+                    Button(action: processCashOnDelivery) {
                         HStack {
                             Spacer()
                             if isProcessingPayment {
                                 ProgressView()
                             } else {
-                                Image(systemName: "message.fill") // Using standard icon as WeChat placeholder
+                                Image(systemName: "banknote.fill")
                                     .foregroundColor(.white)
-                                Text("Pay with WeChat")
+                                Text("Cash on Delivery")
                                     .fontWeight(.bold)
                                     .foregroundColor(.white)
                             }
@@ -141,10 +141,10 @@ struct CheckoutView: View {
                         }
                         .padding(.vertical, 8)
                     }
-                    .listRowBackground(Color.green)
+                    .listRowBackground(Color.blue)
                     .disabled(isProcessingPayment)
                 } footer: {
-                    Text("WeChat Pay is required for this transaction. Deposit will be refunded upon device return.")
+                    Text("Payment will be collected upon delivery. Deposit will be refunded upon device return.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -177,31 +177,19 @@ struct CheckoutView: View {
         }
     }
     
-    private func processWeChatPay() {
+    private func processCashOnDelivery() {
         guard selectedAddress != nil else {
             alertMessage = "Please select a shipping address before completing your order."
             showingAlert = true
             return
         }
         
-        // App Store 4.3 & WeChat logic Check
-        guard let wechatUrl = URL(string: "weixin://") else { return }
+        isProcessingPayment = true
         
-        // This checks if the scheme can be opened
-        if UIApplication.shared.canOpenURL(wechatUrl) {
-            isProcessingPayment = true
-            
-            // Simulate payment processing time
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                // In a real app, you would use WeChat SDK to open WeChat and await a callback
-                // Here we simulate successful payment for the closed loop demo
-                self.alertMessage = "Payment successful! Your order has been placed."
-                self.showingAlert = true
-            }
-        } else {
-            // WeChat is not installed or scheme is not whitelisted in Info.plist
-            alertMessage = "Please install WeChat to proceed with the payment."
-            showingAlert = true
+        // Simulate order processing time
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.alertMessage = "Order placed successfully! Please prepare cash for delivery."
+            self.showingAlert = true
         }
     }
     

@@ -17,6 +17,7 @@ struct zhangshangApp: App {
             ContentView()
                 .environmentObject(orderManager)
                 .environmentObject(addressManager)
+                .preferredColorScheme(.light)
         }
     }
 }

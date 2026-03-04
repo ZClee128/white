@@ -1,4 +1,5 @@
 import SwiftUI
+import WebKit
 
 struct SettingsView: View {
     @State private var showingClearCacheAlert = false
@@ -64,16 +65,9 @@ A: Use the provided return label and package to mail the device back. Make sure 
                 }
                 
                 Section(header: Text("About Us")) {
-                    NavigationLink(destination: TextDocumentView(title: "Terms of Service", content: "Terms of Service for Handheld Console Rental...")) {
-                        HStack {
-                            Image(systemName: "doc.text.fill")
-                                .foregroundColor(.gray)
-                                .frame(width: 24)
-                            Text("Terms of Service")
-                        }
-                    }
-                    
-                    NavigationLink(destination: TextDocumentView(title: "Privacy Policy", content: "Privacy Policy Guidelines...")) {
+                    NavigationLink(destination: WebView(url: URL(string: "https://www.privacypolicies.com/live/cba6c97c-510e-4ad5-abc4-c721ebc194ca")!)
+                        .navigationTitle("Privacy Policy")
+                        .navigationBarTitleDisplayMode(.inline)) {
                         HStack {
                             Image(systemName: "lock.shield.fill")
                                 .foregroundColor(.green)
@@ -130,6 +124,19 @@ A: Use the provided return label and package to mail the device back. Make sure 
                 Text("Cache cleared successfully. Freed up 12.5 MB of space.")
             }
         }
+    }
+}
+
+struct WebView: UIViewRepresentable {
+    let url: URL
+    
+    func makeUIView(context: Context) -> WKWebView {
+        return WKWebView()
+    }
+    
+    func updateUIView(_ webView: WKWebView, context: Context) {
+        let request = URLRequest(url: url)
+        webView.load(request)
     }
 }
 
