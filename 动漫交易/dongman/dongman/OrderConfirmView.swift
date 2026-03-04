@@ -2,6 +2,7 @@ import SwiftUI
 
 struct OrderConfirmView: View {
     let figure: Figure
+    var isFromRepayment: Bool = false
     @EnvironmentObject var store: DataStore
     @Environment(\.dismiss) var dismiss
     @State private var checkmarkScale: CGFloat = 0
@@ -30,11 +31,11 @@ struct OrderConfirmView: View {
                 }
 
                 VStack(spacing: 10) {
-                    Text("Order Placed!")
+                    Text(isFromRepayment ? "Payment Complete!" : "Order Placed!")
                         .font(.largeTitle)
                         .fontWeight(.black)
                         .foregroundColor(.white)
-                    Text("Your figure is on its way.")
+                    Text(isFromRepayment ? "Thank you for your purchase." : "Your figure is on its way.")
                         .font(.body)
                         .foregroundColor(.gray)
                 }
@@ -59,10 +60,6 @@ struct OrderConfirmView: View {
                 // Done button
                 Button {
                     dismiss()
-                    // Also dismiss checkout
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        dismiss()
-                    }
                 } label: {
                     HStack {
                         Spacer()

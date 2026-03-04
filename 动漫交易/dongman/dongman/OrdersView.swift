@@ -15,7 +15,13 @@ struct OrdersView: View {
                         ScrollView(showsIndicators: false) {
                             LazyVStack(spacing: 12) {
                                 ForEach(store.orders) { order in
-                                    OrderRow(order: order)
+                                    NavigationLink {
+                                        OrderDetailView(originalOrder: order)
+                                            .environmentObject(store)
+                                    } label: {
+                                        OrderRow(order: order)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
                             }
                             .padding(.horizontal, 16)

@@ -51,14 +51,11 @@ struct CheckoutView: View {
                         .foregroundColor(.gray)
                 }
             }
-            .fullScreenCover(isPresented: $showConfirm) {
+            .fullScreenCover(isPresented: $showConfirm, onDismiss: {
+                dismiss()
+            }) {
                 OrderConfirmView(figure: figure)
                     .environmentObject(store)
-            }
-            .alert("WeChat Not Installed", isPresented: $showWeChatNotInstalled) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text("Please install WeChat to use WeChat Pay.")
             }
         }
     }
@@ -163,10 +160,10 @@ struct CheckoutView: View {
                         }
                     } else {
                         HStack(spacing: 4) {
-                            Image(systemName: "exclamationmark.triangle.fill")
+                            Image(systemName: "clock.fill")
                                 .font(.caption)
                                 .foregroundColor(.orange)
-                            Text("WeChat not installed")
+                            Text("Pending Payment Option")
                                 .font(.caption)
                                 .foregroundColor(.orange)
                         }
@@ -175,7 +172,7 @@ struct CheckoutView: View {
 
                 Spacer()
 
-                Image(systemName: isWeChatInstalled ? "checkmark.circle.fill" : "xmark.circle.fill")
+                Image(systemName: isWeChatInstalled ? "checkmark.circle.fill" : "clock.fill")
                     .foregroundColor(isWeChatInstalled ?
                         Color(red: 0.07, green: 0.73, blue: 0.18) : .orange)
                     .font(.title3)
@@ -210,20 +207,26 @@ struct CheckoutView: View {
     // MARK: - Confirm Button
     private var confirmButton: some View {
         Button {
-            guard isWeChatInstalled else {
-                showWeChatNotInstalled = true
-                return
-            }
             isProcessing = true
-            // Launch WeChat Pay flow (stub: open WeChat app)
-            if let url = URL(string: "weixin://") {
-                UIApplication.shared.open(url, options: [:]) { _ in }
-            }
-            // Simulate payment success after delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                _ = store.purchaseFigure(figure)
-                isProcessing = false
-                showConfirm = true
+            
+            if isWeChatInstalled {
+                // Launch WeChat Pay flow (stub: open WeChat app)
+                if let url = URL(string: "weixin://") {
+                    UIApplication.shared.open(url, options: [:]) { _ in }
+                }
+                // Simulate payment success after delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    _ = store.purchaseFigure(figure, status: .confirmed)
+                    isProcessing = false
+                    showConfirm = true
+                }
+            } else {
+                // Generate a Pending Order instead
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    _ = store.purchaseFigure(figure, status: .pending)
+                    isProcessing = false
+                    showConfirm = true
+                }
             }
         } label: {
             HStack {
@@ -232,11 +235,18 @@ struct CheckoutView: View {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 } else {
-                    // WeChat Pay green button
-                    HStack(spacing: 8) {
-                        Image(systemName: "message.fill")
-                        Text("Pay with WeChat")
-                            .fontWeight(.bold)
+                    if isWeChatInstalled {
+                        HStack(spacing: 8) {
+                            Image(systemName: "message.fill")
+                            Text("Pay with WeChat")
+                                .fontWeight(.bold)
+                        }
+                    } else {
+                        HStack(spacing: 8) {
+                            Image(systemName: "clock.fill")
+                            Text("Place Order (Pay Later)")
+                                .fontWeight(.bold)
+                        }
                     }
                 }
                 Spacer()
@@ -248,12 +258,12 @@ struct CheckoutView: View {
                 isWeChatInstalled ?
                     LinearGradient(colors: [Color(red: 0.07, green: 0.73, blue: 0.18), Color(red: 0.05, green: 0.58, blue: 0.13)],
                                    startPoint: .leading, endPoint: .trailing) :
-                    LinearGradient(colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.2)],
+                    LinearGradient(colors: [Color.orange, Color.red],
                                    startPoint: .leading, endPoint: .trailing)
             )
             .cornerRadius(18)
             .shadow(color: isWeChatInstalled ?
-                Color(red: 0.07, green: 0.73, blue: 0.18).opacity(0.4) : .clear,
+                Color(red: 0.07, green: 0.73, blue: 0.18).opacity(0.4) : Color.orange.opacity(0.4),
                     radius: 12, y: 6)
         }
         .disabled(isProcessing)

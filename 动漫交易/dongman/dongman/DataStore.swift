@@ -4,7 +4,11 @@ import Combine
 
 class DataStore: ObservableObject {
     @Published var figures: [Figure] = []
-    @Published var orders: [Order] = []
+    @Published var orders: [Order] = [] {
+        didSet {
+            saveOrders()
+        }
+    }
     @Published var flashSaleEndDate: Date = Date().addingTimeInterval(3600 * 6)
 
     // MARK: - Sellers
@@ -20,7 +24,7 @@ class DataStore: ObservableObject {
 
     init() {
         loadFigures()
-        loadSampleOrders()
+        loadOrders()
     }
 
     // MARK: - 13 Figure Data Sources
@@ -126,18 +130,29 @@ class DataStore: ObservableObject {
         figures = figures.filter { !blocked.contains($0.seller.id.uuidString) && !reported.contains($0.id.uuidString) }
     }
 
-    // MARK: - Sample Orders
-    private func loadSampleOrders() {
-        // Will be populated dynamically; start with one delivered sample
+    // MARK: - Orders Persistence
+    private func loadOrders() {
+        guard let data = UserDefaults.standard.data(forKey: "savedOrders"),
+              let decoded = try? JSONDecoder().decode([Order].self, from: data) else {
+            orders = .init()
+            return
+        }
+        orders = decoded
+    }
+    
+    private func saveOrders() {
+        if let encoded = try? JSONEncoder().encode(orders) {
+            UserDefaults.standard.set(encoded, forKey: "savedOrders")
+        }
     }
 
     // MARK: - Methods
 
-    func purchaseFigure(_ figure: Figure) -> Order {
+    func purchaseFigure(_ figure: Figure, status: OrderStatus = .confirmed) -> Order {
         let order = Order(
             id: UUID(),
             figure: figure,
-            status: .confirmed,
+            status: status,
             orderDate: Date(),
             quantity: 1,
             total: figure.price,
@@ -151,6 +166,12 @@ class DataStore: ObservableObject {
         }
 
         return order
+    }
+    
+    func payForOrder(_ order: Order) {
+        if let index = orders.firstIndex(where: { $0.id == order.id }) {
+            orders[index].status = .confirmed
+        }
     }
 
 
