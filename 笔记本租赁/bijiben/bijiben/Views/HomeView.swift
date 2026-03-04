@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
-    @Environment(RentalStore.self) var store
+    @EnvironmentObject var store: RentalStore
     @State private var searchText = ""
     @State private var selectedBrand: String? = nil
 
@@ -16,50 +16,54 @@ struct HomeView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 0) {
-                    // Hero Banner
-                    heroBanner
-
-                    // Brand Filter
-                    brandFilter
-                        .padding(.vertical, 16)
-
-                    // Featured Laptops (Horizontal)
-                    if selectedBrand == nil || selectedBrand == "All" {
-                        featuredSection
-                    }
-
-                    // All Models Header
-                    HStack {
-                        Text(selectedBrand == nil || selectedBrand == "All" ? "All Models" : "\(selectedBrand!) Models")
-                            .font(.title3.bold())
-                        Spacer()
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 12)
-
-                    // Laptop Grid
-                    LazyVStack(spacing: 16) {
-                        ForEach(filteredLaptops) { laptop in
-                            NavigationLink(value: laptop) {
-                                LaptopCard(laptop: laptop)
-                            }
-                            .buttonStyle(.plain)
+        if #available(iOS 16.0, *) {
+            NavigationStack {
+                ScrollView {
+                    VStack(spacing: 0) {
+                        // Hero Banner
+                        heroBanner
+                        
+                        // Brand Filter
+                        brandFilter
+                            .padding(.vertical, 16)
+                        
+                        // Featured Laptops (Horizontal)
+                        if selectedBrand == nil || selectedBrand == "All" {
+                            featuredSection
                         }
+                        
+                        // All Models Header
+                        HStack {
+                            Text(selectedBrand == nil || selectedBrand == "All" ? "All Models" : "\(selectedBrand!) Models")
+                                .font(.title3.bold())
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 12)
+                        
+                        // Laptop Grid
+                        LazyVStack(spacing: 16) {
+                            ForEach(filteredLaptops) { laptop in
+                                NavigationLink(value: laptop) {
+                                    LaptopCard(laptop: laptop)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 24)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 24)
+                }
+                .background(Color(.systemGroupedBackground))
+                .navigationTitle("Rent a Laptop")
+                .navigationBarTitleDisplayMode(.large)
+                .searchable(text: $searchText, prompt: "Search laptops...")
+                .navigationDestination(for: Laptop.self) { laptop in
+                    ProductDetailView(laptop: laptop)
                 }
             }
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle("Rent a Laptop")
-            .navigationBarTitleDisplayMode(.large)
-            .searchable(text: $searchText, prompt: "Search laptops...")
-            .navigationDestination(for: Laptop.self) { laptop in
-                ProductDetailView(laptop: laptop)
-            }
+        } else {
+            // Fallback on earlier versions
         }
     }
 
@@ -142,10 +146,14 @@ struct HomeView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
                     ForEach(store.laptops.prefix(3)) { laptop in
-                        NavigationLink(value: laptop) {
-                            FeaturedCard(laptop: laptop)
+                        if #available(iOS 16.0, *) {
+                            NavigationLink(value: laptop) {
+                                FeaturedCard(laptop: laptop)
+                            }
+                            .buttonStyle(.plain)
+                        } else {
+                            // Fallback on earlier versions
                         }
-                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.horizontal, 16)
@@ -320,5 +328,5 @@ extension Color {
 
 #Preview {
     HomeView()
-        .environment(RentalStore())
+        .environmentObject(RentalStore())
 }

@@ -2,7 +2,7 @@ import SwiftUI
 import Combine
 
 struct DealsView: View {
-    @Environment(RentalStore.self) var store
+    @EnvironmentObject var store: RentalStore
     
     // Timer state for the flash sale countdown
     @State private var timeRemaining = 3600 * 5 + 60 * 23 // 5h 23m remaining
@@ -18,40 +18,44 @@ struct DealsView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Flash Sale Header Badge
-                    flashSaleHeader
-                    
-                    // Flash Sale Items
-                    LazyVStack(spacing: 20) {
-                        ForEach(flashSaleLaptops) { laptop in
-                            NavigationLink(value: laptop) {
-                                FlashSaleCard(laptop: laptop)
+        if #available(iOS 16.0, *) {
+            NavigationStack {
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // Flash Sale Header Badge
+                        flashSaleHeader
+                        
+                        // Flash Sale Items
+                        LazyVStack(spacing: 20) {
+                            ForEach(flashSaleLaptops) { laptop in
+                                NavigationLink(value: laptop) {
+                                    FlashSaleCard(laptop: laptop)
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
+                        .padding(.horizontal, 16)
+                        
+                        // Promotional Banner
+                        promoBanner
+                            .padding(.top, 10)
                     }
-                    .padding(.horizontal, 16)
-                    
-                    // Promotional Banner
-                    promoBanner
-                        .padding(.top, 10)
+                    .padding(.vertical, 16)
                 }
-                .padding(.vertical, 16)
-            }
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle("Exclusive Deals")
-            .navigationBarTitleDisplayMode(.large)
-            .navigationDestination(for: Laptop.self) { laptop in
-                ProductDetailView(laptop: laptop)
-            }
-            .onReceive(timer) { _ in
-                if timeRemaining > 0 {
-                    timeRemaining -= 1
+                .background(Color(.systemGroupedBackground))
+                .navigationTitle("Exclusive Deals")
+                .navigationBarTitleDisplayMode(.large)
+                .navigationDestination(for: Laptop.self) { laptop in
+                    ProductDetailView(laptop: laptop)
+                }
+                .onReceive(timer) { _ in
+                    if timeRemaining > 0 {
+                        timeRemaining -= 1
+                    }
                 }
             }
+        } else {
+            // Fallback on earlier versions
         }
     }
 
@@ -238,5 +242,5 @@ struct FlashSaleCard: View {
 
 #Preview {
     DealsView()
-        .environment(RentalStore())
+        .environmentObject(RentalStore())
 }

@@ -24,5 +24,5 @@ struct MainTabView: View {
 
 #Preview {
     MainTabView()
-        .environment(RentalStore())
+        .environmentObject(RentalStore())
 }

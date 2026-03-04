@@ -7,19 +7,19 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		84C9C0DB2F530018006222A2 /* bijiben.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = bijiben.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		847203B32F583BAD004C856B /* yanjing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = yanjing.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		84C9C0DD2F530018006222A2 /* bijiben */ = {
+		847203B52F583BAD004C856B /* yanjing */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = bijiben;
+			path = yanjing;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		84C9C0D82F530018006222A2 /* Frameworks */ = {
+		847203B02F583BAD004C856B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -29,18 +29,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		84C9C0D22F530018006222A2 = {
+		847203AA2F583BAD004C856B = {
 			isa = PBXGroup;
 			children = (
-				84C9C0DD2F530018006222A2 /* bijiben */,
-				84C9C0DC2F530018006222A2 /* Products */,
+				847203B52F583BAD004C856B /* yanjing */,
+				847203B42F583BAD004C856B /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		84C9C0DC2F530018006222A2 /* Products */ = {
+		847203B42F583BAD004C856B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				84C9C0DB2F530018006222A2 /* bijiben.app */,
+				847203B32F583BAD004C856B /* yanjing.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,64 +48,64 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		84C9C0DA2F530018006222A2 /* bijiben */ = {
+		847203B22F583BAD004C856B /* yanjing */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 84C9C0E62F530019006222A2 /* Build configuration list for PBXNativeTarget "bijiben" */;
+			buildConfigurationList = 847203BE2F583BAE004C856B /* Build configuration list for PBXNativeTarget "yanjing" */;
 			buildPhases = (
-				84C9C0D72F530018006222A2 /* Sources */,
-				84C9C0D82F530018006222A2 /* Frameworks */,
-				84C9C0D92F530018006222A2 /* Resources */,
+				847203AF2F583BAD004C856B /* Sources */,
+				847203B02F583BAD004C856B /* Frameworks */,
+				847203B12F583BAD004C856B /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				84C9C0DD2F530018006222A2 /* bijiben */,
+				847203B52F583BAD004C856B /* yanjing */,
 			);
-			name = bijiben;
+			name = yanjing;
 			packageProductDependencies = (
 			);
-			productName = bijiben;
-			productReference = 84C9C0DB2F530018006222A2 /* bijiben.app */;
+			productName = yanjing;
+			productReference = 847203B32F583BAD004C856B /* yanjing.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		84C9C0D32F530018006222A2 /* Project object */ = {
+		847203AB2F583BAD004C856B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2630;
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
-					84C9C0DA2F530018006222A2 = {
+					847203B22F583BAD004C856B = {
 						CreatedOnToolsVersion = 26.3;
 					};
 				};
 			};
-			buildConfigurationList = 84C9C0D62F530018006222A2 /* Build configuration list for PBXProject "bijiben" */;
+			buildConfigurationList = 847203AE2F583BAD004C856B /* Build configuration list for PBXProject "yanjing" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = 84C9C0D22F530018006222A2;
+			mainGroup = 847203AA2F583BAD004C856B;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 84C9C0DC2F530018006222A2 /* Products */;
+			productRefGroup = 847203B42F583BAD004C856B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				84C9C0DA2F530018006222A2 /* bijiben */,
+				847203B22F583BAD004C856B /* yanjing */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		84C9C0D92F530018006222A2 /* Resources */ = {
+		847203B12F583BAD004C856B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -115,7 +115,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		84C9C0D72F530018006222A2 /* Sources */ = {
+		847203AF2F583BAD004C856B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -125,7 +125,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		84C9C0E42F530019006222A2 /* Debug */ = {
+		847203BC2F583BAE004C856B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -188,7 +188,7 @@
 			};
 			name = Debug;
 		};
-		84C9C0E52F530019006222A2 /* Release */ = {
+		847203BD2F583BAE004C856B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -244,33 +244,35 @@
 			};
 			name = Release;
 		};
-		84C9C0E72F530019006222A2 /* Debug */ = {
+		847203BF2F583BAE004C856B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
-				EXCLUDED_SOURCE_FILE_NAMES = LaptopRentalInfo.plist;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = bijiben/LaptopRentalInfo.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TurboRig;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.bijiben.com;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mori.com.yanjing;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -278,33 +280,35 @@
 			};
 			name = Debug;
 		};
-		84C9C0E82F530019006222A2 /* Release */ = {
+		847203C02F583BAE004C856B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
-				EXCLUDED_SOURCE_FILE_NAMES = LaptopRentalInfo.plist;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = bijiben/LaptopRentalInfo.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TurboRig;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.bijiben.com;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mori.com.yanjing;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -315,25 +319,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		84C9C0D62F530018006222A2 /* Build configuration list for PBXProject "bijiben" */ = {
+		847203AE2F583BAD004C856B /* Build configuration list for PBXProject "yanjing" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				84C9C0E42F530019006222A2 /* Debug */,
-				84C9C0E52F530019006222A2 /* Release */,
+				847203BC2F583BAE004C856B /* Debug */,
+				847203BD2F583BAE004C856B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		84C9C0E62F530019006222A2 /* Build configuration list for PBXNativeTarget "bijiben" */ = {
+		847203BE2F583BAE004C856B /* Build configuration list for PBXNativeTarget "yanjing" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				84C9C0E72F530019006222A2 /* Debug */,
-				84C9C0E82F530019006222A2 /* Release */,
+				847203BF2F583BAE004C856B /* Debug */,
+				847203C02F583BAE004C856B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 84C9C0D32F530018006222A2 /* Project object */;
+	rootObject = 847203AB2F583BAD004C856B /* Project object */;
 }

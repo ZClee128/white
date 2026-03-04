@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct RentalFormView: View {
-    @Environment(RentalStore.self) var store
+    @EnvironmentObject var store: RentalStore
     let laptop: Laptop
     @State var selectedDuration: RentalDuration
 
@@ -27,39 +27,43 @@ struct RentalFormView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                // Order Summary Card
-                orderSummaryCard
-
-                // Rental Duration
-                durationPickerSection
-
-                // Contact Info
-                contactSection
-
-                // Delivery Address
-                addressSection
-
-                // Proceed Button
-                proceedButton
-
-                Spacer(minLength: 40)
+        if #available(iOS 16.0, *) {
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Order Summary Card
+                    orderSummaryCard
+                    
+                    // Rental Duration
+                    durationPickerSection
+                    
+                    // Contact Info
+                    contactSection
+                    
+                    // Delivery Address
+                    addressSection
+                    
+                    // Proceed Button
+                    proceedButton
+                    
+                    Spacer(minLength: 40)
+                }
+                .padding(16)
             }
-            .padding(16)
-        }
-        .background(Color(.systemGroupedBackground))
-        .navigationTitle("Rental Details")
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationDestination(isPresented: $showPayment) {
-            if let order = createdOrder {
-                PaymentView(order: order)
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("Rental Details")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(isPresented: $showPayment) {
+                if let order = createdOrder {
+                    PaymentView(order: order)
+                }
             }
-        }
-        .alert("Please Complete All Fields", isPresented: $showValidationError) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Please enter:\n• Your Name\n• A Phone Number (at least 3 digits)\n• A Delivery Address")
+            .alert("Please Complete All Fields", isPresented: $showValidationError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Please enter:\n• Your Name\n• A Phone Number (at least 3 digits)\n• A Delivery Address")
+            }
+        } else {
+            // Fallback on earlier versions
         }
     }
 
@@ -226,8 +230,12 @@ struct FormField: View {
 }
 
 #Preview {
-    NavigationStack {
-        RentalFormView(laptop: Laptop.sampleData[0], selectedDuration: .sevenDays)
-            .environment(RentalStore())
+    if #available(iOS 16.0, *) {
+        NavigationStack {
+            RentalFormView(laptop: Laptop.sampleData[0], selectedDuration: .sevenDays)
+                .environmentObject(RentalStore())
+        }
+    } else {
+        // Fallback on earlier versions
     }
 }

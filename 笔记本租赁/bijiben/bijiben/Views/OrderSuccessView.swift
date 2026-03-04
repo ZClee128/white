@@ -149,8 +149,12 @@ struct OrderSuccessView: View {
         deliveryAddress: "123 Main St",
         status: .paid
     )
-    NavigationStack {
-        OrderSuccessView(order: order)
-            .environment(RentalStore())
+    if #available(iOS 16.0, *) {
+        NavigationStack {
+            OrderSuccessView(order: order)
+                .environmentObject(RentalStore())
+        }
+    } else {
+        // Fallback on earlier versions
     }
 }

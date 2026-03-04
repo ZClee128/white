@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct PaymentView: View {
-    @Environment(RentalStore.self) var store
+    @EnvironmentObject var store: RentalStore
     let order: RentalOrder
 
     @State private var showSuccess = false
@@ -13,37 +13,41 @@ struct PaymentView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Order Summary
-                orderSummarySection
-
-                // Payment Method
-                paymentMethodSection
-
-                // WeChat CTA
-                weChatCTA
-
-                // After-payment confirm
-                if weChatLaunched {
-                    confirmButton
+        if #available(iOS 16.0, *) {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Order Summary
+                    orderSummarySection
+                    
+                    // Payment Method
+                    paymentMethodSection
+                    
+                    // WeChat CTA
+                    weChatCTA
+                    
+                    // After-payment confirm
+                    if weChatLaunched {
+                        confirmButton
+                    }
+                    
+                    Spacer(minLength: 40)
                 }
-
-                Spacer(minLength: 40)
+                .padding(16)
             }
-            .padding(16)
-        }
-        .background(Color(.systemGroupedBackground))
-        .navigationTitle("Payment")
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(weChatLaunched)
-        .navigationDestination(isPresented: $showSuccess) {
-            OrderSuccessView(order: order)
-        }
-        .alert("WeChat Not Installed", isPresented: $showNoWeChatAlert) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Please install WeChat to complete the payment.")
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("Payment")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(weChatLaunched)
+            .navigationDestination(isPresented: $showSuccess) {
+                OrderSuccessView(order: order)
+            }
+            .alert("WeChat Not Installed", isPresented: $showNoWeChatAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Please install WeChat to complete the payment.")
+            }
+        } else {
+            // Fallback on earlier versions
         }
     }
 
@@ -246,8 +250,12 @@ struct PaymentView: View {
         contactPhone: "138-0000-0000",
         deliveryAddress: "123 Main St, San Francisco"
     )
-    NavigationStack {
-        PaymentView(order: order)
-            .environment(RentalStore())
+    if #available(iOS 16.0, *) {
+        NavigationStack {
+            PaymentView(order: order)
+                .environmentObject(RentalStore())
+        }
+    } else {
+        // Fallback on earlier versions
     }
 }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MyOrdersView: View {
-    @Environment(RentalStore.self) var store
+    @EnvironmentObject var store: RentalStore
     @State private var showNoWeChatAlert = false
 
     var body: some View {
@@ -61,7 +61,7 @@ struct MyOrdersView: View {
 
 // MARK: - Order Card
 struct OrderCard: View {
-    @Environment(RentalStore.self) var store
+    @EnvironmentObject var store: RentalStore
     let order: RentalOrder
 
     var statusColor: Color {
@@ -173,5 +173,5 @@ struct OrderCard: View {
 
 #Preview {
     MyOrdersView()
-        .environment(RentalStore())
+        .environmentObject(RentalStore())
 }

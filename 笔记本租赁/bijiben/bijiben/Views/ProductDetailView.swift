@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ProductDetailView: View {
-    @Environment(RentalStore.self) var store
+    @EnvironmentObject var store: RentalStore
     let laptop: Laptop
     @State private var selectedDuration: RentalDuration = .sevenDays
     @State private var showRentalForm = false
@@ -16,26 +16,30 @@ struct ProductDetailView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                // Device Hero
-                deviceHero
-
-                // Specs
-                specsSection
-
-                // Duration Picker
-                durationSection
-
-                // Price Summary + CTA
-                priceCTA
+        if #available(iOS 16.0, *) {
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Device Hero
+                    deviceHero
+                    
+                    // Specs
+                    specsSection
+                    
+                    // Duration Picker
+                    durationSection
+                    
+                    // Price Summary + CTA
+                    priceCTA
+                }
             }
-        }
-        .background(Color(.systemGroupedBackground))
-        .navigationTitle(laptop.name)
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationDestination(isPresented: $showRentalForm) {
-            RentalFormView(laptop: laptop, selectedDuration: selectedDuration)
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle(laptop.name)
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(isPresented: $showRentalForm) {
+                RentalFormView(laptop: laptop, selectedDuration: selectedDuration)
+            }
+        } else {
+            // Fallback on earlier versions
         }
     }
 
@@ -255,8 +259,12 @@ struct DurationOption: View {
 }
 
 #Preview {
-    NavigationStack {
-        ProductDetailView(laptop: Laptop.sampleData[0])
-            .environment(RentalStore())
+    if #available(iOS 16.0, *) {
+        NavigationStack {
+            ProductDetailView(laptop: Laptop.sampleData[0])
+                .environmentObject(RentalStore())
+        }
+    } else {
+        // Fallback on earlier versions
     }
 }

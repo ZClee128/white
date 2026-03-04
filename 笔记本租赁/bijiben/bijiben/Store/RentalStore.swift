@@ -1,12 +1,12 @@
 import Foundation
-import Observation
+import Combine
 import UIKit
 
-@Observable
 @MainActor
-final class RentalStore {
-    var laptops: [Laptop] = Laptop.sampleData
-    var orders: [RentalOrder] = []
+final class RentalStore: ObservableObject {
+
+    @Published var laptops: [Laptop] = Laptop.sampleData
+    @Published var orders: [RentalOrder] = []
     
     private let ordersKey = "rental_orders_v1"
 
