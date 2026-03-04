@@ -23,7 +23,7 @@ struct Address: Codable, Hashable {
 }
 
 enum OrderStatus: String, Codable {
-    case pending = "Pending Payment"
+    case pending = "Pending (Cash on Delivery)"
     case confirmed = "Confirmed"
     case active = "Active"
     case completed = "Completed"
@@ -32,7 +32,7 @@ enum OrderStatus: String, Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let rawString = try container.decode(String.self)
-        if rawString == "Pending" {
+        if rawString == "Pending" || rawString == "Pending Payment" {
             self = .pending
         } else if let validStatus = OrderStatus(rawValue: rawString) {
             self = validStatus

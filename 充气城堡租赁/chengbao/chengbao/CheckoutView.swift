@@ -100,21 +100,21 @@ struct CheckoutView: View {
                 .padding(24)
             }
             
-            // WeChat Pay Button
+            // Cash on Delivery Button
             VStack {
                 Divider()
                 Button(action: {
                     processPayment()
                 }) {
                     HStack {
-                        Image(systemName: "message.fill") // Placeholder for WeChat icon
-                        Text("Pay with WeChat")
+                        Image(systemName: "banknote.fill")
+                        Text("Place Order (Cash on Delivery)")
                     }
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color(hex: "#07C160")) // Official wechat green
+                    .background(Color.blue)
                     .cornerRadius(25)
                 }
                 .padding(.horizontal, 24)
@@ -142,26 +142,13 @@ struct CheckoutView: View {
     }
     
     private func processPayment() {
-        let wechatScheme = "weixin://"
-        guard let url = URL(string: wechatScheme) else { return }
-        
-        if UIApplication.shared.canOpenURL(url) {
-            // Wechat is installed, we can attempt to open it.
-            // In a real app we'd use the WeChat SDK. Here we simulate completing the order.
-            createOrder(status: .confirmed)
-            showingSuccess = true
-        } else {
-            // Wechat is not installed.
-            // Save as pending payment and notify user.
-            createOrder(status: .pending)
-            alertMessage = "WeChat is not installed. Your order has been saved as a Pending Payment. You can view it in My Rentals."
-            showAlert = true
-        }
+        createOrder(status: .pending)
+        showingSuccess = true
     }
     
     private func createOrder(status: OrderStatus) {
         let total = castle.pricePerDay * Double(rentalDays)
-        let newOrder = Order(id: UUID(), bouncyCastleId: castle.id, address: address, totalAmount: total, orderDate: Date(), status: status, wechatTransactionId: status == .confirmed ? "WX\(Int.random(in: 1000...9999))" : nil)
+        let newOrder = Order(id: UUID(), bouncyCastleId: castle.id, address: address, totalAmount: total, orderDate: Date(), status: status, wechatTransactionId: nil)
         dataStore.saveOrder(newOrder)
     }
 }

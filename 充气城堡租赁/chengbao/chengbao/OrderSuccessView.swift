@@ -24,10 +24,10 @@ struct OrderSuccessView: View {
             }
             
             VStack(spacing: 12) {
-                Text("Payment Successful!")
+                Text("Order Placed!")
                     .font(.system(size: 28, weight: .bold))
                 
-                Text("Your Bouncy Castle rental is confirmed. We will contact you shortly regarding delivery.")
+                Text("Your Bouncy Castle rental is booked. Please wait for delivery and pay upon arrival (Cash on Delivery).")
                     .font(.system(size: 16))
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.center)

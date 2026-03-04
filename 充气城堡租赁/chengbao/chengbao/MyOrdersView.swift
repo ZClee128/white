@@ -57,9 +57,6 @@ struct OrderCardView: View {
     let castle: BouncyCastle
     @EnvironmentObject var dataStore: DataStore
     
-    @State private var showAlert = false
-    @State private var alertMessage = ""
-    
     var body: some View {
         VStack(spacing: 0) {
             // Header: Date and Status
@@ -96,61 +93,15 @@ struct OrderCardView: View {
                     Text("Total: $\(String(format: "%.0f", order.totalAmount))")
                         .font(.system(size: 14, weight: .medium))
                     
-                    if let txId = order.wechatTransactionId {
-                        Text("WX: \(txId)")
-                            .font(.system(size: 10))
-                            .foregroundColor(.gray)
-                    }
                 }
                 
                 Spacer()
             }
             .padding(16)
             
-            // Pending Payment Action
-            if order.status == .pending {
-                Divider()
-                Button(action: {
-                    processPayment()
-                }) {
-                    HStack {
-                        Image(systemName: "message.fill")
-                        Text("Pay with WeChat")
-                    }
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color(hex: "#07C160"))
-                    .cornerRadius(12)
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
-            }
         }
-        .background(Color.white)
         .cornerRadius(20)
         .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
-        .alert(isPresented: $showAlert) {
-            Alert(title: Text("Payment Notice"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
-        }
-    }
-    
-    private func processPayment() {
-        let wechatScheme = "weixin://"
-        guard let url = URL(string: wechatScheme) else { return }
-        
-        if UIApplication.shared.canOpenURL(url) {
-            // WeChat is installed — simulate payment success
-            var updatedOrder = order
-            updatedOrder.status = .confirmed
-            updatedOrder.wechatTransactionId = "WX\(Int.random(in: 1000...9999))"
-            dataStore.updateOrder(updatedOrder)
-        } else {
-            // WeChat is not installed — keep the order as Pending Payment
-            alertMessage = "WeChat is not installed. Please install WeChat to complete this payment. Your order remains as Pending Payment."
-            showAlert = true
-        }
     }
     
     var statusColor: Color {

@@ -4,6 +4,7 @@ struct SettingsView: View {
     @State private var showingAlert = false
     @State private var alertMessage = ""
     @State private var alertTitle = ""
+    @State private var showingPrivacyPolicy = false
     
     var body: some View {
         Group {
@@ -28,10 +29,7 @@ struct SettingsView: View {
                             VStack(spacing: 0) {
                                 SettingsRow(icon: "lock.shield.fill", color: .green, title: "Privacy Policy")
                                     .onTapGesture {
-                                        showMyAlert(
-                                            title: "Privacy Policy",
-                                            message: "All order data is stored locally on your device and is never uploaded to any server. We do not collect any personal information."
-                                        )
+                                        showingPrivacyPolicy = true
                                     }
                                 Divider().padding(.leading, 56)
                                 SettingsRow(icon: "message.fill", color: Color(hex: "#07C160"), title: "Contact Support")
@@ -63,6 +61,9 @@ struct SettingsView: View {
             .navigationBarHidden(true)
             .alert(isPresented: $showingAlert) {
                 Alert(title: Text(alertTitle), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+            }
+            .sheet(isPresented: $showingPrivacyPolicy) {
+                WebView(url: URL(string: "https://www.privacypolicies.com/live/d7a765d8-bc2e-4429-b5cf-6f56db88c42d")!)
             }
         }
     }
