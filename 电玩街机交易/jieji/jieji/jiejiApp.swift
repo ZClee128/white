@@ -16,6 +16,7 @@ struct jiejiApp: App {
     var body: some Scene {
         WindowGroup {
             MainTabView()
+                .preferredColorScheme(.light)
                 .environmentObject(cartManager)
                 .environmentObject(addressManager)
                 .environmentObject(orderManager)

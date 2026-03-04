@@ -2,7 +2,6 @@ import SwiftUI
 
 struct OrdersView: View {
     @EnvironmentObject var orderManager: OrderManager
-    @State private var showingNoWeChatAlert = false
     
     let dateFormatter: DateFormatter = {
         let df = DateFormatter()
@@ -26,20 +25,13 @@ struct OrdersView: View {
                 } else {
                     List {
                         ForEach(orderManager.orders) { order in
-                            OrderRowView(order: order, dateFormatter: dateFormatter, showingNoWeChatAlert: $showingNoWeChatAlert)
+                            OrderRowView(order: order, dateFormatter: dateFormatter)
                         }
                     }
                     .listStyle(InsetGroupedListStyle())
                 }
             }
             .navigationTitle("My Orders")
-            .alert(isPresented: $showingNoWeChatAlert) {
-                Alert(
-                    title: Text("WeChat Not Installed"),
-                    message: Text("WeChat is not installed on this device. Please install WeChat to complete the payment."),
-                    dismissButton: .default(Text("OK"))
-                )
-            }
         }
     }
 }
@@ -48,7 +40,6 @@ struct OrderRowView: View {
     let order: Order
     let dateFormatter: DateFormatter
     @EnvironmentObject var orderManager: OrderManager
-    @Binding var showingNoWeChatAlert: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -60,10 +51,10 @@ struct OrderRowView: View {
                 Text(order.status)
                     .font(.caption)
                     .fontWeight(.bold)
-                    .foregroundColor(order.status == "Paid" ? .green : .orange)
+                    .foregroundColor(order.status == "Cash on Delivery" ? .green : .orange)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background((order.status == "Paid" ? Color.green : Color.orange).opacity(0.1))
+                    .background((order.status == "Cash on Delivery" ? Color.green : Color.orange).opacity(0.1))
                     .cornerRadius(8)
             }
             
@@ -103,33 +94,7 @@ struct OrderRowView: View {
                     .font(.headline)
                     .foregroundColor(.accentColor)
             }
-            
-            if order.status == "Pending Payment" {
-                Button(action: {
-                    if let url = URL(string: "weixin://"), UIApplication.shared.canOpenURL(url) {
-                        UIApplication.shared.open(url)
-                        // In a real app we'd wait for AppDelegate callback. Simulate success here.
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                            orderManager.updateOrderStatus(id: order.id, newStatus: "Paid")
-                        }
-                    } else {
-                        showingNoWeChatAlert = true
-                    }
-                }) {
-                    HStack {
-                        Image(systemName: "message.fill")
-                        Text("Pay with WeChat")
-                            .fontWeight(.bold)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-                    .padding(.top, 8)
-                }
-            }
+            .padding(.vertical, 8)
         }
-        .padding(.vertical, 8)
     }
 }

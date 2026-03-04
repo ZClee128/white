@@ -5,7 +5,6 @@ struct CheckoutView: View {
     @EnvironmentObject var addressManager: AddressManager
     @EnvironmentObject var orderManager: OrderManager
     
-    @State private var showingNoWeChatAlert = false
     @State private var navigateToSuccess = false
     
     var defaultAddress: Address? {
@@ -122,35 +121,16 @@ struct CheckoutView: View {
             .padding(.vertical)
         }
         .navigationTitle("Checkout")
-        .alert(isPresented: $showingNoWeChatAlert) {
-            Alert(
-                title: Text("WeChat Not Installed"),
-                message: Text("WeChat is not installed. Your order has been saved as 'Pending Payment' in My Orders. Please install WeChat to complete the purchase."),
-                dismissButton: .default(Text("View Orders")) {
-                    navigateToSuccess = true 
-                }
-            )
-        }
+        .navigationTitle("Checkout")
     }
     
     private func submitOrderAction() {
         guard let address = defaultAddress else { return }
         
-        // 1. Create Order as Pending and clear cart immediately
-        let orderId = orderManager.createOrder(items: cartManager.items, totalAmount: cartManager.totalPrice, address: address, status: "Pending Payment")
+        // Create Order as Cash on Delivery and clear cart
+        let orderId = orderManager.createOrder(items: cartManager.items, totalAmount: cartManager.totalPrice, address: address, status: "Cash on Delivery")
         cartManager.clearCart()
         
-        // 2. Attempt Payment
-        if let url = URL(string: "weixin://"), UIApplication.shared.canOpenURL(url) {
-            UIApplication.shared.open(url)
-            // In a real app we'd wait for AppDelegate callback. Simulate success here.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                orderManager.updateOrderStatus(id: orderId, newStatus: "Paid")
-                navigateToSuccess = true
-            }
-        } else {
-            // Not installed: show alert but order is already saved as pending
-            showingNoWeChatAlert = true
-        }
+        navigateToSuccess = true
     }
 }
