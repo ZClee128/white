@@ -1,4 +1,5 @@
 import SwiftUI
+import PassKit
 
 struct OrderDetailView: View {
     let originalOrder: Order
@@ -6,16 +7,10 @@ struct OrderDetailView: View {
     @Environment(\.dismiss) var dismiss
     
     @State private var isProcessing = false
-    @State private var showWeChatNotInstalled = false
     @State private var showConfirm = false
     
     private var order: Order {
         store.orders.first(where: { $0.id == originalOrder.id }) ?? originalOrder
-    }
-    
-    private var isWeChatInstalled: Bool {
-        guard let url = URL(string: "weixin://") else { return false }
-        return UIApplication.shared.canOpenURL(url)
     }
 
     var body: some View {
@@ -58,39 +53,26 @@ struct OrderDetailView: View {
                                 .foregroundColor(.orange)
                             
                             Button {
-                                if !isWeChatInstalled {
-                                    showWeChatNotInstalled = true
-                                    return
-                                }
-                                isProcessing = true
-                                if let url = URL(string: "weixin://") {
-                                    UIApplication.shared.open(url, options: [:]) { _ in }
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                                    store.payForOrder(order)
-                                    isProcessing = false
-                                    showConfirm = true
-                                }
+                                handleApplePay()
                             } label: {
                                 HStack {
                                     Spacer()
                                     if isProcessing {
                                         ProgressView()
-                                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                            .progressViewStyle(CircularProgressViewStyle(tint: .black))
                                     } else {
-                                        Image(systemName: "message.fill")
-                                        Text("Pay now with WeChat")
-                                            .fontWeight(.bold)
+                                        HStack(spacing: 6) {
+                                            Image(systemName: "apple.logo")
+                                            Text("Pay with Apple Pay")
+                                                .fontWeight(.bold)
+                                        }
                                     }
                                     Spacer()
                                 }
                                 .font(.headline)
-                                .foregroundColor(.white)
+                                .foregroundColor(.black)
                                 .frame(height: 56)
-                                .background(
-                                    LinearGradient(colors: [Color(red: 0.07, green: 0.73, blue: 0.18), Color(red: 0.05, green: 0.58, blue: 0.13)],
-                                                   startPoint: .leading, endPoint: .trailing)
-                                )
+                                .background(Color.white)
                                 .cornerRadius(16)
                             }
                             .disabled(isProcessing)
@@ -107,11 +89,6 @@ struct OrderDetailView: View {
         .navigationTitle("Order Details")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
-        .alert("WeChat Not Installed", isPresented: $showWeChatNotInstalled) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Please install WeChat to use WeChat Pay.")
-        }
         // When payment succeeds, we can show a brief confirmation
         .fullScreenCover(isPresented: $showConfirm) {
             OrderConfirmView(figure: order.figure, isFromRepayment: true)
@@ -139,5 +116,58 @@ struct OrderDetailView: View {
         fmt.dateStyle = .medium
         fmt.timeStyle = .short
         return fmt.string(from: date)
+    }
+
+    // MARK: - Apple Pay Processing
+    private func handleApplePay() {
+        guard PKPaymentAuthorizationController.canMakePayments() else { return }
+
+        let request = PKPaymentRequest()
+        request.merchantIdentifier = "merchant.com.dongman.app"
+        request.supportedNetworks = [.visa, .masterCard, .amex, .chinaUnionPay]
+        request.merchantCapabilities = .capability3DS
+        request.countryCode = "US"
+        request.currencyCode = "USD"
+        request.paymentSummaryItems = [
+            PKPaymentSummaryItem(label: order.figure.name,
+                                 amount: NSDecimalNumber(value: order.figure.price)),
+            PKPaymentSummaryItem(label: "Shipping",
+                                 amount: NSDecimalNumber(value: 4.99)),
+            PKPaymentSummaryItem(label: "Platform Fee",
+                                 amount: NSDecimalNumber(value: 1.50)),
+            PKPaymentSummaryItem(label: "Dongman Market",
+                                 amount: NSDecimalNumber(value: order.total + 4.99 + 1.50))
+        ]
+
+        let controller = PKPaymentAuthorizationController(paymentRequest: request)
+        let delegate = OrderApplePayDelegate {
+            // Because there's no backend, don't actually confirm the order:
+            // store.payForOrder(order)
+            showConfirm = true
+        }
+        controller.delegate = delegate
+        objc_setAssociatedObject(controller, "applePayDelegate", delegate,
+                                 .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        controller.present(completion: nil)
+    }
+}
+
+class OrderApplePayDelegate: NSObject, PKPaymentAuthorizationControllerDelegate {
+    private let onSuccess: () -> Void
+    init(onSuccess: @escaping () -> Void) { self.onSuccess = onSuccess }
+
+    func paymentAuthorizationController(
+        _ controller: PKPaymentAuthorizationController,
+        didAuthorizePayment payment: PKPayment,
+        handler completion: @escaping (PKPaymentAuthorizationResult) -> Void
+    ) {
+        completion(PKPaymentAuthorizationResult(status: .success, errors: []))
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.onSuccess()
+        }
+    }
+
+    func paymentAuthorizationControllerDidFinish(_ controller: PKPaymentAuthorizationController) {
+        controller.dismiss(completion: nil)
     }
 }

@@ -1,19 +1,19 @@
 import SwiftUI
-import UIKit
+import PassKit
+
+// MARK: - CheckoutView
 
 struct CheckoutView: View {
     let figure: Figure
     @EnvironmentObject var store: DataStore
     @EnvironmentObject var addressStore: AddressStore
     @Environment(\.dismiss) var dismiss
-    @State private var showConfirm: Bool = false
-    @State private var isProcessing: Bool = false
-    @State private var showWeChatNotInstalled: Bool = false
 
-    private var isWeChatInstalled: Bool {
-        guard let url = URL(string: "weixin://") else { return false }
-        return UIApplication.shared.canOpenURL(url)
-    }
+    @State private var showConfirm = false
+    @State private var isProcessing = false
+    @State private var paymentError: String? = nil
+
+    var totalAmount: Double { figure.price + 4.99 + 1.50 }
 
     var body: some View {
         NavigationStack {
@@ -22,22 +22,18 @@ struct CheckoutView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
-                        // Item summary
-                        itemCard
-                            .padding(.top, 20)
-
-                        // Shipping
+                        itemCard.padding(.top, 20)
                         shippingCard
-
-                        // Payment — WeChat Pay
-                        paymentCard
-
-                        // Price breakdown
                         priceBreakdown
 
-                        // Confirm button
-                        confirmButton
-                            .padding(.bottom, 30)
+                        if let err = paymentError {
+                            Text(err)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                                .padding(.horizontal, 4)
+                        }
+
+                        applePayButton.padding(.bottom, 30)
                     }
                     .padding(.horizontal, 20)
                 }
@@ -47,13 +43,10 @@ struct CheckoutView: View {
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
-                        .foregroundColor(.gray)
+                    Button("Cancel") { dismiss() }.foregroundColor(.gray)
                 }
             }
-            .fullScreenCover(isPresented: $showConfirm, onDismiss: {
-                dismiss()
-            }) {
+            .fullScreenCover(isPresented: $showConfirm, onDismiss: { dismiss() }) {
                 OrderConfirmView(figure: figure)
                     .environmentObject(store)
             }
@@ -74,28 +67,20 @@ struct CheckoutView: View {
                 }
                 VStack(alignment: .leading, spacing: 4) {
                     Text(figure.name)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .font(.subheadline).fontWeight(.semibold).foregroundColor(.white)
                     Text(figure.series)
-                        .font(.caption)
-                        .foregroundColor(.gray)
+                        .font(.caption).foregroundColor(.gray)
                     HStack(spacing: 6) {
                         Circle().fill(figure.condition.color).frame(width: 7, height: 7)
                         Text(figure.condition.rawValue)
-                            .font(.caption)
-                            .foregroundColor(figure.condition.color)
+                            .font(.caption).foregroundColor(figure.condition.color)
                     }
                 }
                 Spacer()
                 VStack(alignment: .trailing) {
                     Text("$\(String(format: "%.2f", figure.price))")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                    Text("Qty: 1")
-                        .font(.caption)
-                        .foregroundColor(.gray)
+                        .font(.headline).fontWeight(.bold).foregroundColor(.white)
+                    Text("Qty: 1").font(.caption).foregroundColor(.gray)
                 }
             }
         }
@@ -110,74 +95,18 @@ struct CheckoutView: View {
                         .foregroundColor(Color(red: 0.42, green: 0.36, blue: 0.91))
                     VStack(alignment: .leading, spacing: 3) {
                         Text(addr.name)
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
+                            .font(.subheadline).fontWeight(.semibold).foregroundColor(.white)
                         Text(addr.fullAddress)
-                            .font(.caption)
-                            .foregroundColor(.gray)
+                            .font(.caption).foregroundColor(.gray)
                     }
                 }
             } else {
                 HStack(spacing: 10) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.orange)
+                    Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.orange)
                     Text("No address saved – go to Settings to add one")
-                        .font(.caption)
-                        .foregroundColor(.orange)
+                        .font(.caption).foregroundColor(.orange)
                 }
             }
-        }
-    }
-
-    // MARK: - WeChat Pay Card
-    private var paymentCard: some View {
-        CheckoutSection(title: "Payment Method") {
-            HStack(spacing: 14) {
-                // WeChat green icon
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(red: 0.07, green: 0.73, blue: 0.18))
-                        .frame(width: 44, height: 44)
-                    Image(systemName: "message.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(.white)
-                }
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("WeChat Pay")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                    if isWeChatInstalled {
-                        HStack(spacing: 4) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.caption)
-                                .foregroundColor(Color(red: 0.07, green: 0.73, blue: 0.18))
-                            Text("WeChat detected")
-                                .font(.caption)
-                                .foregroundColor(Color(red: 0.07, green: 0.73, blue: 0.18))
-                        }
-                    } else {
-                        HStack(spacing: 4) {
-                            Image(systemName: "clock.fill")
-                                .font(.caption)
-                                .foregroundColor(.orange)
-                            Text("Pending Payment Option")
-                                .font(.caption)
-                                .foregroundColor(.orange)
-                        }
-                    }
-                }
-
-                Spacer()
-
-                Image(systemName: isWeChatInstalled ? "checkmark.circle.fill" : "clock.fill")
-                    .foregroundColor(isWeChatInstalled ?
-                        Color(red: 0.07, green: 0.73, blue: 0.18) : .orange)
-                    .font(.title3)
-            }
-            .padding(4)
         }
     }
 
@@ -190,87 +119,111 @@ struct CheckoutView: View {
                 PriceLine(label: "Platform fee", value: 1.50)
                 Divider().background(Color.white.opacity(0.1))
                 HStack {
-                    Text("Total")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
+                    Text("Total").font(.headline).fontWeight(.bold).foregroundColor(.white)
                     Spacer()
-                    Text("$\(String(format: "%.2f", figure.price + 4.99 + 1.50))")
-                        .font(.headline)
-                        .fontWeight(.black)
+                    Text("$\(String(format: "%.2f", totalAmount))")
+                        .font(.headline).fontWeight(.black)
                         .foregroundColor(Color(red: 0.42, green: 0.36, blue: 0.91))
                 }
             }
         }
     }
 
-    // MARK: - Confirm Button
-    private var confirmButton: some View {
+    // MARK: - Apple Pay Button
+    private var applePayButton: some View {
         Button {
-            isProcessing = true
-            
-            if isWeChatInstalled {
-                // Launch WeChat Pay flow (stub: open WeChat app)
-                if let url = URL(string: "weixin://") {
-                    UIApplication.shared.open(url, options: [:]) { _ in }
-                }
-                // Simulate payment success after delay
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    _ = store.purchaseFigure(figure, status: .confirmed)
-                    isProcessing = false
-                    showConfirm = true
-                }
-            } else {
-                // Generate a Pending Order instead
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    _ = store.purchaseFigure(figure, status: .pending)
-                    isProcessing = false
-                    showConfirm = true
-                }
-            }
+            paymentError = nil
+            handleApplePay()
         } label: {
             HStack {
                 Spacer()
                 if isProcessing {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .progressViewStyle(CircularProgressViewStyle(tint: .black))
                 } else {
-                    if isWeChatInstalled {
-                        HStack(spacing: 8) {
-                            Image(systemName: "message.fill")
-                            Text("Pay with WeChat")
-                                .fontWeight(.bold)
-                        }
-                    } else {
-                        HStack(spacing: 8) {
-                            Image(systemName: "clock.fill")
-                            Text("Place Order (Pay Later)")
-                                .fontWeight(.bold)
-                        }
+                    HStack(spacing: 6) {
+                        Image(systemName: "apple.logo")
+                        Text("Pay")
+                            .fontWeight(.bold)
                     }
                 }
                 Spacer()
             }
-            .font(.headline)
-            .foregroundColor(.white)
-            .frame(height: 58)
-            .background(
-                isWeChatInstalled ?
-                    LinearGradient(colors: [Color(red: 0.07, green: 0.73, blue: 0.18), Color(red: 0.05, green: 0.58, blue: 0.13)],
-                                   startPoint: .leading, endPoint: .trailing) :
-                    LinearGradient(colors: [Color.orange, Color.red],
-                                   startPoint: .leading, endPoint: .trailing)
-            )
-            .cornerRadius(18)
-            .shadow(color: isWeChatInstalled ?
-                Color(red: 0.07, green: 0.73, blue: 0.18).opacity(0.4) : Color.orange.opacity(0.4),
-                    radius: 12, y: 6)
+            .font(.title3)
+            .foregroundColor(.black)
+            .frame(height: 50)
+            .background(Color.white)
+            .cornerRadius(10)
         }
         .disabled(isProcessing)
     }
+
+    // MARK: - Payment Processing
+    private func handleApplePay() {
+        guard addressStore.defaultAddress != nil else {
+            paymentError = "Please add a shipping address before completing your order."
+            return
+        }
+
+        guard PKPaymentAuthorizationController.canMakePayments() else {
+            paymentError = "Apple Pay is not set up on this device or not available."
+            return
+        }
+
+        let request = PKPaymentRequest()
+        request.merchantIdentifier = "merchant.com.dongman.app"
+        request.supportedNetworks = [.visa, .masterCard, .amex, .chinaUnionPay]
+        request.merchantCapabilities = .capability3DS
+        request.countryCode = "US"
+        request.currencyCode = "USD"
+        request.paymentSummaryItems = [
+            PKPaymentSummaryItem(label: figure.name,
+                                 amount: NSDecimalNumber(value: figure.price)),
+            PKPaymentSummaryItem(label: "Shipping",
+                                 amount: NSDecimalNumber(value: 4.99)),
+            PKPaymentSummaryItem(label: "Platform Fee",
+                                 amount: NSDecimalNumber(value: 1.50)),
+            PKPaymentSummaryItem(label: "Dongman Market",
+                                 amount: NSDecimalNumber(value: totalAmount))
+        ]
+
+        let controller = PKPaymentAuthorizationController(paymentRequest: request)
+        let delegate = ApplePayDelegate {
+            _ = store.purchaseFigure(figure, status: .pending)
+            showConfirm = true
+        }
+        controller.delegate = delegate
+        // Keep delegate alive
+        objc_setAssociatedObject(controller, "applePayDelegate", delegate,
+                                 .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        controller.present(completion: nil)
+    }
 }
 
-// MARK: - Helpers (shared)
+// MARK: - Apple Pay Delegate
+
+class ApplePayDelegate: NSObject, PKPaymentAuthorizationControllerDelegate {
+    private let onSuccess: () -> Void
+    init(onSuccess: @escaping () -> Void) { self.onSuccess = onSuccess }
+
+    func paymentAuthorizationController(
+        _ controller: PKPaymentAuthorizationController,
+        didAuthorizePayment payment: PKPayment,
+        handler completion: @escaping (PKPaymentAuthorizationResult) -> Void
+    ) {
+        // In production: send payment.token to your server here to charge the card
+        completion(PKPaymentAuthorizationResult(status: .success, errors: []))
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.onSuccess()
+        }
+    }
+
+    func paymentAuthorizationControllerDidFinish(_ controller: PKPaymentAuthorizationController) {
+        controller.dismiss(completion: nil)
+    }
+}
+
+// MARK: - Shared Helpers
 
 struct CheckoutSection<Content: View>: View {
     let title: String
@@ -279,11 +232,9 @@ struct CheckoutSection<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title)
-                .font(.caption)
-                .fontWeight(.semibold)
+                .font(.caption).fontWeight(.semibold)
                 .foregroundColor(.gray)
-                .textCase(.uppercase)
-                .tracking(0.8)
+                .textCase(.uppercase).tracking(0.8)
             content
         }
         .padding(16)
@@ -298,13 +249,9 @@ struct PriceLine: View {
 
     var body: some View {
         HStack {
-            Text(label)
-                .font(.subheadline)
-                .foregroundColor(.gray)
+            Text(label).font(.subheadline).foregroundColor(.gray)
             Spacer()
-            Text("$\(String(format: "%.2f", value))")
-                .font(.subheadline)
-                .foregroundColor(.white)
+            Text("$\(String(format: "%.2f", value))").font(.subheadline).foregroundColor(.white)
         }
     }
 }
