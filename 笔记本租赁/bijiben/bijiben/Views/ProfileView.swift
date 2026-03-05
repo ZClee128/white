@@ -130,7 +130,6 @@ struct ProfileView: View {
                 } message: { Text("This will be auto-filled in future rentals.") }
                     .alert("Edit Phone Number", isPresented: $showEditPhone) {
                         TextField("Phone", text: $editPhoneText)
-                            .keyboardType(.phonePad)
                         Button("Cancel", role: .cancel) { }
                         Button("Save") { savedPhone = editPhoneText }
                     } message: { Text("This will be auto-filled in future rentals.") }
@@ -143,10 +142,10 @@ struct ProfileView: View {
                     .alert("Support", isPresented: $showContactInfo) {
                         Button("OK", role: .cancel) { }
                     } message: {
-                        Text("For rental extensions, early returns, or technical support, please contact us via WeChat: laptop_rentals_cs")
+                        Text("For rental extensions, early returns, or technical support, please contact us:\n\nEmail: support@turborig.app\nPhone: +1 (415) 800-9200")
                     }
                     .sheet(isPresented: $showPrivacyPolicy) {
-                        SafariView(url: URL(string: "https://www.privacypolicies.com/live/1c77e334-dcf6-41e7-9bec-d54825eeb806")!)
+                        SafariView(url: URL(string: "https://docs.qq.com/doc/DQkhzcnN1Q2ppSWhw")!)
                     }
             }
         } else {

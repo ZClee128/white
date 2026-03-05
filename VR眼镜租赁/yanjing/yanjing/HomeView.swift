@@ -3,6 +3,14 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var appState: AppState
     @State private var searchText = ""
+    
+    var filteredProducts: [Product] {
+        if searchText.isEmpty {
+            return appState.products
+        } else {
+            return appState.products.filter { $0.name.localizedCaseInsensitiveContains(searchText) || $0.brand.localizedCaseInsensitiveContains(searchText) }
+        }
+    }
 
     var body: some View {
         NavigationView {
@@ -30,7 +38,7 @@ struct HomeView: View {
                             .padding(.horizontal)
                         
                         LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)], spacing: 16) {
-                            ForEach(appState.products) { product in
+                            ForEach(filteredProducts) { product in
                                 NavigationLink(destination: ProductDetailView(product: product)) {
                                     ProductCardView(product: product)
                                 }
@@ -55,14 +63,14 @@ struct FeaturedCarouselView: View {
             ForEach(products) { product in
                 NavigationLink(destination: ProductDetailView(product: product)) {
                     ZStack(alignment: .bottomLeading) {
-                        AsyncImage(url: URL(string: product.imageURL)) { image in
-                            image.resizable()
-                                .scaledToFill()
-                        } placeholder: {
-                            Color.gray.opacity(0.3)
-                        }
-                        .frame(height: 220)
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                        Color.clear // SwiftUI trick to force exact constraints without expanding layout bounds
+                            .frame(height: 220)
+                            .overlay(
+                                Image(product.name)
+                                    .resizable()
+                                    .scaledToFill()
+                            )
+                            .clipped()
                         
                         // Gradient Overlay
                         LinearGradient(
@@ -93,6 +101,8 @@ struct FeaturedCarouselView: View {
                         }
                         .padding()
                     }
+                    .frame(height: 220)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
                     .padding(.horizontal)
                 }
             }
@@ -107,13 +117,14 @@ struct ProductCardView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            AsyncImage(url: URL(string: product.imageURL)) { image in
-                image.resizable()
-                    .scaledToFill()
-            } placeholder: {
-                Color.gray.opacity(0.2)
-            }
-            .frame(height: 140)
+            Color.clear // Ensure the grid cell isn't stretched horizontally
+                .frame(height: 140)
+                .overlay(
+                    Image(product.name)
+                        .resizable()
+                        .scaledToFill()
+                )
+                .clipped()
             .clipped()
             
             VStack(alignment: .leading, spacing: 6) {
@@ -143,7 +154,7 @@ struct ProductCardView: View {
             .padding(12)
         }
         .background(Color(.systemBackground))
-        .cornerRadius(16)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
         .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
     }
 }

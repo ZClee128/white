@@ -23,11 +23,10 @@ struct ContentView: View {
                 }
                 .badge(appState.cart.count > 0 ? "\(appState.cart.count)" : nil)
             
-            OrdersView()
+            PackagesView()
                 .tabItem {
-                    Label("Orders", systemImage: "doc.text.fill")
+                    Label("Packages", systemImage: "shippingbox.fill")
                 }
-                .badge(appState.orders.filter { $0.status == .pendingPayment }.count > 0 ? "!" : nil)
             
             SettingsView()
                 .tabItem {

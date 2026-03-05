@@ -14,26 +14,8 @@ final class RentalStore: ObservableObject {
         loadOrders()
     }
 
-    // MARK: - WeChat Detection
-    func isWeChatInstalled() -> Bool {
-        guard let url = URL(string: "weixin://") else { return false }
-        return UIApplication.shared.canOpenURL(url)
-    }
-
-    func openWeChat(amount: Double, orderNumber: String) {
-        // Launch WeChat for payment (no SDK needed – compliant with App Store review)
-        // In production, integrate proper WeChat Pay URL scheme with your merchant params
-        if let url = URL(string: "weixin://") {
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
-        }
-    }
-
-    func openWeChatAppStore() {
-        // WeChat on App Store
-        if let url = URL(string: "https://apps.apple.com/app/wechat/id414478124") {
-            UIApplication.shared.open(url)
-        }
-    }
+    // MARK: - Payment
+    // Cash on Delivery: no external payment SDK required.
 
     // MARK: - Order Management
     func createOrder(

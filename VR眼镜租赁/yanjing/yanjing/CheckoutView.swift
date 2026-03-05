@@ -41,8 +41,8 @@ struct CheckoutView: View {
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 } else {
                     HStack {
-                        Image(systemName: "message.fill")
-                        Text("Pay with WeChat Pay")
+                        Image(systemName: "box.truck.fill")
+                        Text("Place Order (Cash on Delivery)")
                             .font(.headline)
                             .fontWeight(.semibold)
                     }
@@ -50,7 +50,7 @@ struct CheckoutView: View {
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .background(Color.green)
+            .background(Color.blue)
             .foregroundColor(.white)
             .cornerRadius(16)
             .disabled(isProcessing)
@@ -67,11 +67,11 @@ struct CheckoutView: View {
         .padding()
         .alert(isPresented: $showingAlert) {
             Alert(
-                title: Text("Order Status"),
+                title: Text("Order Confirmed"),
                 message: Text(alertMessage),
                 dismissButton: .default(Text("OK")) {
                     for product in appState.cart {
-                        let newOrder = Order(orderNumber: UUID().uuidString.prefix(8).uppercased(), product: product, rentalDays: 1, status: .pendingPayment, totalAmount: product.pricePerDay, date: Date())
+                        let newOrder = Order(orderNumber: UUID().uuidString.prefix(8).uppercased(), product: product, rentalDays: 1, status: .cashOnDelivery, totalAmount: product.pricePerDay, date: Date())
                         appState.orders.append(newOrder)
                     }
                     appState.cart.removeAll()
@@ -86,19 +86,7 @@ struct CheckoutView: View {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
             isProcessing = false
-            checkWechatInstall()
-        }
-    }
-    
-    func checkWechatInstall() {
-        if let wechatUrl = URL(string: "weixin://"), UIApplication.shared.canOpenURL(wechatUrl) {
-            self.alertMessage = "WeChat payment processed successfully."
-            self.showingAlert = true
-        } else {
-            // Strictly adhering to Guideline 4.2.3(i):
-            // We do not prompt user to install any 3rd-party app.
-            // We elegantly downgrade the experience.
-            self.alertMessage = "Order created successfully. We've saved your request as 'Pending Payment' since the payment gateway app was not detected on this device. You can complete the payment anytime from your orders."
+            self.alertMessage = "Your order has been placed successfully! Please pay the courier in cash when your VR equipment is delivered."
             self.showingAlert = true
         }
     }

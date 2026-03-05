@@ -31,9 +31,9 @@ enum RentalDuration: Int, CaseIterable, Codable {
 }
 
 enum OrderStatus: String, Codable, CaseIterable, Hashable {
-    case pending = "Pending Payment"
-    case paid = "Paid"
-    case active = "Active"
+    case pending = "Order Placed"
+    case paid = "Confirmed"
+    case active = "Out for Delivery"
     case returned = "Returned"
 
     var color: String {
@@ -47,9 +47,9 @@ enum OrderStatus: String, Codable, CaseIterable, Hashable {
 
     var icon: String {
         switch self {
-        case .pending: return "clock.fill"
-        case .paid: return "checkmark.circle.fill"
-        case .active: return "laptopcomputer"
+        case .pending: return "checkmark.circle.fill"
+        case .paid: return "shippingbox.fill"
+        case .active: return "box.truck.fill"
         case .returned: return "arrow.uturn.left.circle.fill"
         }
     }

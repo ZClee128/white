@@ -12,13 +12,10 @@ struct ProductDetailView: View {
             VStack(alignment: .leading, spacing: 0) {
                 // Header Image
                 ZStack(alignment: .topLeading) {
-                    AsyncImage(url: URL(string: product.imageURL)) { image in
-                        image.resizable()
-                            .scaledToFill()
-                    } placeholder: {
-                        Color.gray.opacity(0.2)
-                    }
-                    .frame(height: 350)
+                    Image(product.name)
+                        .resizable()
+                        .scaledToFill()
+                    .frame(width: UIScreen.main.bounds.width, height: 350)
                     .clipped()
                 }
                 
@@ -88,7 +85,7 @@ struct ProductDetailView: View {
                 }
                 .padding()
                 .background(Color(.systemBackground))
-                .cornerRadius(30, corners: [.topLeft, .topRight])
+                .cornerRadius(30)
                 .offset(y: -30)
             }
         }
@@ -142,19 +139,4 @@ struct ProductDetailView: View {
     }
 }
 
-// Helper to round specific corners
-extension View {
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape( RoundedCorner(radius: radius, corners: corners) )
-    }
-}
 
-struct RoundedCorner: Shape {
-    var radius: CGFloat = .infinity
-    var corners: UIRectCorner = .allCorners
-
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
-        return Path(path.cgPath)
-    }
-}

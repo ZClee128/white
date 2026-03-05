@@ -7,6 +7,26 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             Form {
+                Section(header: Text("My Account")) {
+                    NavigationLink(destination: OrdersView()) {
+                        HStack {
+                            Image(systemName: "doc.text.fill")
+                                .foregroundColor(.orange)
+                                .frame(width: 30)
+                            Text("My Orders")
+                            Spacer()
+                            if appState.orders.filter({ $0.status == .cashOnDelivery }).count > 0 {
+                                Text("\(appState.orders.filter({ $0.status == .cashOnDelivery }).count)")
+                                    .font(.caption)
+                                    .foregroundColor(.white)
+                                    .padding(6)
+                                    .background(Color.red)
+                                    .clipShape(Circle())
+                            }
+                        }
+                    }
+                }
+                
                 Section(header: Text("Account & Setup")) {
                     NavigationLink(destination: AddressManagementView()) {
                         HStack {

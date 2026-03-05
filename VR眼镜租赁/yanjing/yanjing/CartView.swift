@@ -10,7 +10,7 @@ struct CartView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color(.systemGroupedBackground).edgesIgnoringSafeArea(.all)
+                Color.gray.opacity(0.1).edgesIgnoringSafeArea(.all)
                 
                 if appState.cart.isEmpty {
                     VStack(spacing: 20) {
@@ -53,7 +53,7 @@ struct CartView: View {
                             }
                         }
                         .padding()
-                        .background(Color(.systemBackground))
+                        .background(Color.white)
                         .shadow(color: Color.black.opacity(0.05), radius: 10, y: -5)
                     }
                 }
@@ -72,12 +72,9 @@ struct CartRowView: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            AsyncImage(url: URL(string: product.imageURL)) { image in
-                image.resizable()
-                    .scaledToFill()
-            } placeholder: {
-                Color.gray.opacity(0.2)
-            }
+            Image(product.name)
+                .resizable()
+                .scaledToFill()
             .frame(width: 80, height: 80)
             .cornerRadius(10)
             

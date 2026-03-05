@@ -33,6 +33,7 @@ struct OrdersView: View {
 
 struct OrderRowView: View {
     var order: Order
+    @State private var showingCashAlert = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -52,12 +53,9 @@ struct OrderRowView: View {
             }
             
             HStack(spacing: 16) {
-                AsyncImage(url: URL(string: order.product.imageURL)) { image in
-                    image.resizable()
-                        .scaledToFill()
-                } placeholder: {
-                    Color.gray.opacity(0.2)
-                }
+                Image(order.product.name)
+                    .resizable()
+                    .scaledToFill()
                 .frame(width: 60, height: 60)
                 .cornerRadius(8)
                 
@@ -76,11 +74,11 @@ struct OrderRowView: View {
                     .fontWeight(.bold)
             }
             
-            if order.status == .pendingPayment {
+            if order.status == .cashOnDelivery {
                 Button(action: {
-                    // Logic to retry payment
+                    showingCashAlert = true
                 }) {
-                    Text("Pay Now")
+                    Text("Prepare Cash")
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .foregroundColor(.white)
@@ -90,6 +88,13 @@ struct OrderRowView: View {
                         .cornerRadius(8)
                 }
                 .padding(.top, 8)
+                .alert(isPresented: $showingCashAlert) {
+                    Alert(
+                        title: Text("Notice"),
+                        message: Text("Please prepare $\(String(format: "%.2f", order.totalAmount)) in cash for the courier when your order arrives."),
+                        dismissButton: .default(Text("Got It!"))
+                    )
+                }
             }
         }
         .padding(.vertical, 8)
@@ -97,7 +102,7 @@ struct OrderRowView: View {
     
     func statusColor(_ status: OrderStatus) -> Color {
         switch status {
-        case .pendingPayment: return .orange
+        case .cashOnDelivery: return .orange
         case .paid: return .green
         case .shipped: return .blue
         case .completed: return .gray

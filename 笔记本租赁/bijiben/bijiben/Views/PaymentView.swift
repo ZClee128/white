@@ -5,12 +5,6 @@ struct PaymentView: View {
     let order: RentalOrder
 
     @State private var showSuccess = false
-    @State private var weChatLaunched = false
-    @State private var showNoWeChatAlert = false
-
-    var weChatInstalled: Bool {
-        store.isWeChatInstalled()
-    }
 
     var body: some View {
         if #available(iOS 16.0, *) {
@@ -18,18 +12,16 @@ struct PaymentView: View {
                 VStack(spacing: 24) {
                     // Order Summary
                     orderSummarySection
-                    
+
                     // Payment Method
                     paymentMethodSection
-                    
-                    // WeChat CTA
-                    weChatCTA
-                    
-                    // After-payment confirm
-                    if weChatLaunched {
-                        confirmButton
-                    }
-                    
+
+                    // COD Info
+                    codInfoSection
+
+                    // Confirm Button
+                    confirmButton
+
                     Spacer(minLength: 40)
                 }
                 .padding(16)
@@ -37,14 +29,8 @@ struct PaymentView: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Payment")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationBarBackButtonHidden(weChatLaunched)
             .navigationDestination(isPresented: $showSuccess) {
                 OrderSuccessView(order: order)
-            }
-            .alert("WeChat Not Installed", isPresented: $showNoWeChatAlert) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text("Please install WeChat to complete the payment.")
             }
         } else {
             // Fallback on earlier versions
@@ -101,118 +87,81 @@ struct PaymentView: View {
             HStack(spacing: 14) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(hex: "07C160"))
+                        .fill(Color(hex: "0f3460"))
                         .frame(width: 46, height: 46)
-                    Image(systemName: "message.fill")
+                    Image(systemName: "banknote.fill")
                         .foregroundColor(.white)
                         .font(.title3)
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("WeChat Pay")
+                    Text("Cash on Delivery")
                         .font(.headline)
-                    Text("Secure · Instant · Widely Accepted")
+                    Text("Pay when your device arrives")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
 
                 Spacer()
 
-                Image(systemName: weChatInstalled ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
-                    .foregroundColor(weChatInstalled ? .green : .orange)
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
                     .font(.title3)
             }
             .padding(16)
             .background(Color(.systemBackground))
             .cornerRadius(12)
-
-            if !weChatInstalled {
-//                HStack(spacing: 8) {
-//                    Image(systemName: "info.circle.fill")
-//                        .foregroundColor(.orange)
-//                        .font(.footnote)
-//                    Text("WeChat is not installed on this device. Please download it to complete payment.")
-//                        .font(.footnote)
-//                        .foregroundColor(.secondary)
-//                }
-//                .padding(12)
-//                .background(Color.orange.opacity(0.08))
-//                .cornerRadius(10)
-            }
         }
     }
 
-    // MARK: WeChat CTA
-    private var weChatCTA: some View {
-        VStack(spacing: 12) {
-            if weChatInstalled {
-                Button {
-                    store.openWeChat(amount: order.totalPrice, orderNumber: order.orderNumber)
-                    withAnimation {
-                        weChatLaunched = true
-                    }
-                } label: {
-                    HStack(spacing: 10) {
-                        Image(systemName: "arrow.up.forward.app.fill")
-                        Text("Pay with WeChat — $\(String(format: "%.0f", order.totalPrice))")
-                            .font(.headline)
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 54)
-                    .background(
-                        RoundedRectangle(cornerRadius: 14)
-                            .fill(Color(hex: "07C160"))
-                    )
+    // MARK: COD Info
+    private var codInfoSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: "info.circle.fill")
+                    .foregroundColor(Color(hex: "0f3460"))
+                    .font(.subheadline)
+                    .padding(.top, 1)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("How it works")
+                        .font(.subheadline.bold())
+                        .foregroundColor(Color(hex: "0f3460"))
+                    Text("1. Place your order by tapping Confirm below.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text("2. Our team will contact you to arrange delivery.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text("3. Pay in cash when the device is delivered to you.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
-            } else {
-//                Button {
-//                    showNoWeChatAlert = true
-//                } label: {
-//                    HStack(spacing: 10) {
-//                        Image(systemName: "arrow.down.circle.fill")
-//                        Text("Download WeChat to Pay")
-//                            .font(.headline)
-//                    }
-//                    .foregroundColor(.white)
-//                    .frame(maxWidth: .infinity)
-//                    .frame(height: 54)
-//                    .background(
-//                        RoundedRectangle(cornerRadius: 14)
-//                            .fill(Color(hex: "07C160"))
-//                    )
-//                }
             }
+            .padding(14)
+            .background(Color(hex: "0f3460").opacity(0.07))
+            .cornerRadius(12)
         }
     }
 
     // MARK: Confirm Button
     private var confirmButton: some View {
-        VStack(spacing: 10) {
-            Text("After completing payment in WeChat, tap the button below.")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-
-            Button {
-                store.confirmPayment(for: order.id)
-                showSuccess = true
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "checkmark.seal.fill")
-                    Text("I've Completed Payment")
-                        .font(.headline)
-                }
-                .foregroundColor(Color(hex: "0f3460"))
-                .frame(maxWidth: .infinity)
-                .frame(height: 54)
-                .background(
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(Color(hex: "0f3460"), lineWidth: 2)
-                )
+        Button {
+            store.confirmPayment(for: order.id)
+            showSuccess = true
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "checkmark.seal.fill")
+                Text("Confirm Order — $\(String(format: "%.0f", order.totalPrice))")
+                    .font(.headline)
             }
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 54)
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(Color(hex: "0f3460"))
+            )
         }
-        .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 
     // MARK: Helpers

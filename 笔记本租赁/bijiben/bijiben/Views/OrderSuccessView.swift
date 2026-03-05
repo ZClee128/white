@@ -44,7 +44,7 @@ struct OrderSuccessView: View {
                             .font(.title.bold())
                             .foregroundColor(.primary)
 
-                        Text("Your payment was received.")
+                        Text("We'll contact you to arrange delivery.")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -65,7 +65,7 @@ struct OrderSuccessView: View {
                 Divider().padding(.leading, 50)
                 infoRow(icon: "shippingbox.fill", label: "Est. Delivery", value: estimatedDelivery)
                 Divider().padding(.leading, 50)
-                infoRow(icon: "dollarsign.circle.fill", label: "Total Paid", value: "$\(String(format: "%.0f", order.totalPrice))")
+                infoRow(icon: "dollarsign.circle.fill", label: "Order Total", value: "$\(String(format: "%.0f", order.totalPrice))")
             }
             .background(Color(.systemBackground))
             .cornerRadius(16)

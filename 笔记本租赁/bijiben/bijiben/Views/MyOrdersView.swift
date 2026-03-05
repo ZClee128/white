@@ -2,7 +2,6 @@ import SwiftUI
 
 struct MyOrdersView: View {
     @EnvironmentObject var store: RentalStore
-    @State private var showNoWeChatAlert = false
 
     var body: some View {
         Group {
@@ -12,16 +11,7 @@ struct MyOrdersView: View {
                 ScrollView {
                     LazyVStack(spacing: 14) {
                         ForEach(store.orders) { order in
-                            Button {
-                                if store.isWeChatInstalled() {
-                                    store.openWeChat(amount: order.totalPrice, orderNumber: order.orderNumber)
-                                } else {
-                                    showNoWeChatAlert = true
-                                }
-                            } label: {
-                                OrderCard(order: order)
-                            }
-                            .buttonStyle(.plain)
+                            OrderCard(order: order)
                         }
                     }
                     .padding(16)
@@ -31,11 +21,7 @@ struct MyOrdersView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle("My Orders")
         .navigationBarTitleDisplayMode(.large)
-        .alert("WeChat Not Installed", isPresented: $showNoWeChatAlert) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Please install WeChat to complete the payment.")
-        }
+
     }
 
     private var emptyState: some View {
