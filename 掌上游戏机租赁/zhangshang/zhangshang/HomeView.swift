@@ -91,7 +91,7 @@ struct ConsoleCardView: View {
                     .font(.headline)
                     .lineLimit(1)
                 
-                Text("¥\(String(format: "%.0f", console.dailyPrice))/day")
+                Text("$\(String(format: "%.0f", console.dailyPrice))/day")
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(.purple)

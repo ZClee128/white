@@ -34,13 +34,13 @@ struct ConsoleDetailView: View {
                             .fontWeight(.bold)
                         Spacer()
                         VStack(alignment: .trailing) {
-                            Text("¥\(String(format: "%.1f", priceToShow))/day")
+                            Text("$\(String(format: "%.1f", priceToShow))/day")
                                 .font(.title2)
                                 .fontWeight(.bold)
                                 .foregroundColor(.purple)
                             
                             if discountedPrice != nil {
-                                Text("¥\(String(format: "%.0f", console.dailyPrice))")
+                                Text("$\(String(format: "%.0f", console.dailyPrice))")
                                     .font(.caption)
                                     .strikethrough()
                                     .foregroundColor(.secondary)
@@ -48,7 +48,7 @@ struct ConsoleDetailView: View {
                         }
                     }
                     
-                    Text("Deposit: ¥\(String(format: "%.0f", console.deposit)) (Refundable)")
+                    Text("Deposit: $\(String(format: "%.0f", console.deposit)) (Refundable)")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     

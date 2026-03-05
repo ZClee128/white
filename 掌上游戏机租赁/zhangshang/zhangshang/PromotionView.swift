@@ -128,7 +128,7 @@ struct PromotionCardView: View {
                 
                 // Pricing row
                 HStack(alignment: .bottom) {
-                    Text("¥\(String(format: "%.1f", promotion.discountedPrice))")
+                    Text("$\(String(format: "%.1f", promotion.discountedPrice))")
                         .font(.title)
                         .fontWeight(.black)
                         .foregroundColor(.yellow)
@@ -137,7 +137,7 @@ struct PromotionCardView: View {
                         .foregroundColor(.yellow.opacity(0.8))
                         .padding(.bottom, 4)
                     
-                    Text("¥\(String(format: "%.0f", promotion.originalPrice))")
+                    Text("$\(String(format: "%.0f", promotion.originalPrice))")
                         .font(.subheadline)
                         .strikethrough()
                         .foregroundColor(.white.opacity(0.6))

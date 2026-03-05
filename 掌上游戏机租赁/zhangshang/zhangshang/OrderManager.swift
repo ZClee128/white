@@ -59,7 +59,7 @@ class OrderManager: ObservableObject {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
         formatter.currencyCode = "CNY"
-        formatter.currencySymbol = "¥"
-        return formatter.string(from: NSNumber(value: amount)) ?? "¥\(String(format: "%.2f", amount))"
+        formatter.currencySymbol = "$"
+        return formatter.string(from: NSNumber(value: amount)) ?? "$\(String(format: "%.2f", amount))"
     }
 }

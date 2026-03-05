@@ -89,14 +89,14 @@ struct OrderDetailView: View {
                         HStack {
                             Text("Total Amount")
                             Spacer()
-                            Text("¥\(String(format: "%.0f", currentOrder.totalPrice))")
+                            Text("$\(String(format: "%.0f", currentOrder.totalPrice))")
                                 .fontWeight(.bold)
                         }
                         HStack {
                             Text("Deposit (Refundable)")
                                 .foregroundColor(.secondary)
                             Spacer()
-                            Text("¥\(String(format: "%.0f", currentOrder.console.deposit))")
+                            Text("$\(String(format: "%.0f", currentOrder.console.deposit))")
                                 .foregroundColor(.secondary)
                         }
                         
@@ -106,7 +106,7 @@ struct OrderDetailView: View {
                                 Text("Deposit Refunded")
                                     .foregroundColor(.green)
                                 Spacer()
-                                Text("¥\(String(format: "%.0f", currentOrder.console.deposit))")
+                                Text("$\(String(format: "%.0f", currentOrder.console.deposit))")
                                     .foregroundColor(.green)
                             }
                         }
@@ -147,7 +147,7 @@ struct OrderDetailView: View {
                 orderManager.returnOrder(orderId: order.id)
             }
         } message: {
-            Text("Are you sure you want to return this console? Your deposit of ¥\(String(format: "%.0f", currentOrder.console.deposit)) will be refunded.")
+            Text("Are you sure you want to return this console? Your deposit of $\(String(format: "%.0f", currentOrder.console.deposit)) will be refunded.")
         }
     }
 }

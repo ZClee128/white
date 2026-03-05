@@ -79,12 +79,12 @@ struct CheckoutView: View {
                             Text(console.name)
                                 .font(.headline)
                             HStack(spacing: 4) {
-                                Text("¥\(String(format: "%.1f", priceToUse))/day")
+                                Text("$\(String(format: "%.1f", priceToUse))/day")
                                     .font(.subheadline)
                                     .foregroundColor(discountedPrice != nil ? .red : .secondary)
                                 
                                 if discountedPrice != nil {
-                                    Text("¥\(String(format: "%.0f", console.dailyPrice))")
+                                    Text("$\(String(format: "%.0f", console.dailyPrice))")
                                         .font(.caption2)
                                         .strikethrough()
                                         .foregroundColor(.secondary)
@@ -105,20 +105,20 @@ struct CheckoutView: View {
                     HStack {
                         Text("Rental Fee (\(rentalDays) days)")
                         Spacer()
-                        Text("¥\(String(format: "%.1f", priceToUse * Double(rentalDays)))")
+                        Text("$\(String(format: "%.1f", priceToUse * Double(rentalDays)))")
                     }
                     
                     HStack {
                         Text("Device Deposit (Refundable)")
                         Spacer()
-                        Text("¥\(String(format: "%.0f", console.deposit))")
+                        Text("$\(String(format: "%.0f", console.deposit))")
                     }
                     
                     HStack {
                         Text("Total Amount")
                             .font(.headline)
                         Spacer()
-                        Text("¥\(String(format: "%.0f", totalPrice))")
+                        Text("$\(String(format: "%.0f", totalPrice))")
                             .font(.headline)
                             .foregroundColor(.red)
                     }

@@ -65,7 +65,7 @@ A: Use the provided return label and package to mail the device back. Make sure 
                 }
                 
                 Section(header: Text("About Us")) {
-                    NavigationLink(destination: WebView(url: URL(string: "https://www.privacypolicies.com/live/cba6c97c-510e-4ad5-abc4-c721ebc194ca")!)
+                    NavigationLink(destination: WebView(url: URL(string: "https://docs.qq.com/doc/DQmhKaEVZc1ZDeEti")!)
                         .navigationTitle("Privacy Policy")
                         .navigationBarTitleDisplayMode(.inline)) {
                         HStack {
@@ -103,13 +103,8 @@ A: Use the provided return label and package to mail the device back. Make sure 
             .listStyle(InsetGroupedListStyle())
             .navigationTitle("Setting")
             .confirmationDialog("Contact Support", isPresented: $showingContactActionSheet, titleVisibility: .visible) {
-                 Button("Call Us: +1-800-555-0199") {
-                     if let url = URL(string: "tel://+18005550199"), UIApplication.shared.canOpenURL(url) {
-                         UIApplication.shared.open(url)
-                     }
-                 }
-                 Button("Email: support@gamehub.example.com") {
-                     if let url = URL(string: "mailto:support@gamehub.example.com"), UIApplication.shared.canOpenURL(url) {
+                 Button("Email: support@borrowplay.com") {
+                     if let url = URL(string: "mailto:support@borrowplay.com"), UIApplication.shared.canOpenURL(url) {
                          UIApplication.shared.open(url)
                      }
                  }
@@ -118,10 +113,10 @@ A: Use the provided return label and package to mail the device back. Make sure 
             .alert("Clear Cache", isPresented: $showingClearCacheAlert) {
                 Button("Cancel", role: .cancel) { }
                 Button("Confirm", role: .destructive) {
-                    // Simulated clear action
+                    URLCache.shared.removeAllCachedResponses()
                 }
             } message: {
-                Text("Cache cleared successfully. Freed up 12.5 MB of space.")
+                Text("This will clear all cached data. Are you sure?")
             }
         }
     }

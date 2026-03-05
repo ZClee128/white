@@ -79,7 +79,7 @@ struct OrderRowView: View {
                 
                 Spacer()
                 
-                Text("¥\(String(format: "%.0f", order.totalPrice))")
+                Text("$\(String(format: "%.0f", order.totalPrice))")
                     .font(.headline)
             }
         }
