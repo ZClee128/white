@@ -44,7 +44,7 @@ struct SettingsView: View {
                                     .onTapGesture {
                                         showMyAlert(
                                             title: "FAQ",
-                                            message: "Q: How do I rent?\nA: Browse castles, select one, enter your address, and pay via WeChat.\n\nQ: What areas do you serve?\nA: We deliver within 30 miles of your location.\n\nQ: Can I cancel my order?\nA: Orders can be cancelled up to 48 hours before the rental date."
+                                            message: "Q: How do I rent?\nA: Browse castles, select one, enter your delivery address, and place your order. Payment is made in cash upon delivery.\n\nQ: What areas do you serve?\nA: We deliver within 30 miles of your location.\n\nQ: Can I cancel my order?\nA: Orders can be cancelled up to 48 hours before the rental date."
                                         )
                                     }
                             }
@@ -63,7 +63,7 @@ struct SettingsView: View {
                 Alert(title: Text(alertTitle), message: Text(alertMessage), dismissButton: .default(Text("OK")))
             }
             .sheet(isPresented: $showingPrivacyPolicy) {
-                WebView(url: URL(string: "https://www.privacypolicies.com/live/d7a765d8-bc2e-4429-b5cf-6f56db88c42d")!)
+                WebView(url: URL(string: "https://docs.qq.com/doc/DQkx3UW5WbE1TdE5W")!)
             }
         }
     }
