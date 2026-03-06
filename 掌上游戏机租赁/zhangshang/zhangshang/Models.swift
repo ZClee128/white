@@ -59,8 +59,8 @@ struct MockData {
     static let consoles = [
         Console(
             id: UUID(),
-            name: "Switch OLED",
-            description: "The premium handheld experience with a vibrant 7-inch OLED screen, enhanced audio, and an adjustable stand. Perfect for Zelda and Mario.",
+            name: "OLED Handheld",
+            description: "The premium handheld experience with a vibrant 7-inch OLED screen, enhanced audio, and an adjustable stand. Perfect for classic adventures.",
             features: ["7-inch OLED Screen", "Enhanced Audio", "Wide Adjustable Stand", "64GB Internal Storage"],
             imageName: "gamecontroller.fill",
             dailyPrice: 20.0,
@@ -68,7 +68,7 @@ struct MockData {
         ),
         Console(
             id: UUID(),
-            name: "Steam Engine",
+            name: "Pro PC Deck",
             description: "A powerful portable PC gaming device. Play your entire PC library anywhere with incredible performance and ergonomic controls.",
             features: ["Zen 2 + RDNA 2 Architecture", "16GB LPDDR5 RAM", "7-inch Touchscreen", "Trackpads"],
             imageName: "pc",
@@ -87,8 +87,8 @@ struct MockData {
         Console(
             id: UUID(),
             name: "Retro Boy",
-            description: "Relive the classics. This pocket-sized emulator handles thousands of retro titles from the 8-bit and 16-bit eras with a stunning IPS display.",
-            features: ["3.5-inch IPS Screen", "Supports 20+ Emulators", "Open Source Linux", "128GB MicroSD Included"],
+            description: "Relive the classics. This pocket-sized console handles thousands of retro titles from the 8-bit and 16-bit eras with a stunning IPS display.",
+            features: ["3.5-inch IPS Screen", "Supports 20+ Classic Systems", "Open Source Linux", "128GB MicroSD Included"],
             imageName: "dpad",
             dailyPrice: 10.0,
             deposit: 300.0
@@ -96,7 +96,7 @@ struct MockData {
         Console(
             id: UUID(),
             name: "Ally X",
-            description: "Top-tier Windows gaming handheld with a 120Hz display and immense processing power. Uncompromised AAA gaming on the go.",
+            description: "Top-tier PC gaming handheld with a 120Hz display and immense processing power. Uncompromised AAA gaming on the go.",
             features: ["Ryzen Z1 Extreme", "120Hz 1080p Display", "24GB LPDDR5X RAM", "Hall Effect Joysticks"],
             imageName: "display.2",
             dailyPrice: 40.0,
@@ -104,7 +104,7 @@ struct MockData {
         ),
         Console(
             id: UUID(),
-            name: "Switch Lite",
+            name: "Compact Handheld",
             description: "Compact, lightweight, and dedicated to handheld play. The perfect companion for gamers who are always on the move.",
             features: ["Integrated Controls", "5.5-inch Touch Screen", "Lightweight Design", "D-Pad Included"],
             imageName: "gamecontroller",
@@ -113,7 +113,7 @@ struct MockData {
         ),
         Console(
             id: UUID(),
-            name: "Legion Go",
+            name: "Max Go",
             description: "A versatile PC gaming powerhouse featuring detachable controllers and a massive 8.8-inch QHD+ display.",
             features: ["8.8-inch QHD+ 144Hz Screen", "Detachable Controllers", "FPS Mode enabled", "Kickstand built-in"],
             imageName: "desktopcomputer",
@@ -123,7 +123,7 @@ struct MockData {
         Console(
             id: UUID(),
             name: "Pocket 4 Pro",
-            description: "The ultimate Android-based retro gaming handheld. Powerful enough to emulate PS2 and GameCube flawlessly, while fitting comfortably in your pocket.",
+            description: "The ultimate Android-based retro gaming handheld. Powerful enough for classic 3D gaming flawlessly, while fitting comfortably in your pocket.",
             features: ["Dimensity 1100 Processor", "4.7-inch Touchscreen", "Active Cooling", "Android 13 OS"],
             imageName: "iphone.gen1",
             dailyPrice: 12.0,
@@ -168,7 +168,7 @@ struct MockData {
         Console(
             id: UUID(),
             name: "Miyoo Mini+",
-            description: "The aesthetic king of micro-emulators. Play classic 8-bit and 16-bit games on a device smaller than a deck of cards.",
+            description: "The aesthetic king of micro-consoles. Play classic 8-bit and 16-bit games on a device smaller than a deck of cards.",
             features: ["Ultra-compact", "3.5-inch IPS Screen", "OnionOS Compatible", "Vibration Motor"],
             imageName: "square.grid.3x3.square",
             dailyPrice: 4.0,
@@ -177,7 +177,7 @@ struct MockData {
         Console(
             id: UUID(),
             name: "Ayn Odin 2",
-            description: "The absolute pinnacle of Android handhelds. Featuring a Snapdragon 8 Gen 2, it handles everything including high-end Switch emulation.",
+            description: "The absolute pinnacle of Android handhelds. Featuring a Snapdragon 8 Gen 2, it handles everything including high-end portable gaming.",
             features: ["Snapdragon 8 Gen 2", "Massive 8000mAh Battery", "6-inch 1080p Screen", "Hall Effect Analytics"],
             imageName: "bolt.horizontal.fill",
             dailyPrice: 22.0,
@@ -204,7 +204,7 @@ struct MockData {
         Console(
             id: UUID(),
             name: "Win 4",
-            description: "The slide-out keyboard PC handheld. A true pocket PC that looks like a PSP but runs full heavy-duty Windows AAA games.",
+            description: "The slide-out keyboard PC handheld. A true pocket PC that looks like a PSP but runs full heavy-duty PC AAA games.",
             features: ["Slide-out Physical Keyboard", "6-inch Screen", "Optical Trackpoint", "Dual USB-C 40Gbps"],
             imageName: "keyboard",
             dailyPrice: 38.0,
@@ -216,8 +216,8 @@ struct MockData {
         Promotion(
             id: UUID(),
             title: "Weekend Sale 🎮",
-            subtitle: "Switch OLED Best Price",
-            discountTargetConsoleId: consoles[0].id, // Switch
+            subtitle: "OLED Handheld Best Price",
+            discountTargetConsoleId: consoles[0].id, // OLED Handheld
             originalPrice: 20.0,
             discountedPrice: 9.9,
             endTime: Calendar.current.date(byAdding: .day, value: 2, to: Date())!,
@@ -227,8 +227,8 @@ struct MockData {
         Promotion(
             id: UUID(),
             title: "Hardcore Exclusives 🔥",
-            subtitle: "Steam Engine Trial",
-            discountTargetConsoleId: consoles[1].id, // Steam Engine
+            subtitle: "Pro PC Deck Trial",
+            discountTargetConsoleId: consoles[1].id, // Pro PC Deck
             originalPrice: 35.0,
             discountedPrice: 25.0,
             endTime: Calendar.current.date(byAdding: .hour, value: 5, to: Date())!,
