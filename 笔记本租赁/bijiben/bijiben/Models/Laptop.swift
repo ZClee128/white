@@ -134,7 +134,7 @@ extension Laptop {
             dailyPrice: 80,
             weeklyPrice: 400,
             monthlyPrice: 1200,
-            description: "Mainstream esports weapon with a completely new chassis design and fully upgraded cooling. Smoothly play all kinds of AAA masterpieces."
+            description: "Mainstream esports weapon with a completely new chassis design and fully upgraded cooling. Smoothly play all kinds of demanding games."
         ),
         Laptop(
             id: "laptop_predator_helios",

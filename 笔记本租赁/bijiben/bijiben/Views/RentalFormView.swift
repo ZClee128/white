@@ -11,13 +11,15 @@ struct RentalFormView: View {
     @State private var showPayment = false
     @State private var createdOrder: RentalOrder?
     @State private var showValidationError = false
+    @State private var addProtectionPlan = false
 
     var totalPrice: Double {
-        selectedDuration.totalPrice(
+        let base = selectedDuration.totalPrice(
             daily: laptop.dailyPrice,
             weekly: laptop.weeklyPrice,
             monthly: laptop.monthlyPrice
         )
+        return addProtectionPlan ? base + 15.0 : base
     }
 
     var isFormValid: Bool {
@@ -41,6 +43,9 @@ struct RentalFormView: View {
                     
                     // Delivery Address
                     addressSection
+                    
+                    // Device Protection
+                    protectionSection
                     
                     // Proceed Button
                     proceedButton
@@ -156,6 +161,35 @@ struct RentalFormView: View {
                 text: $deliveryAddress,
                 keyboardType: .default
             )
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+        }
+    }
+
+    // MARK: Device Protection
+    private var protectionSection: some View {
+        FormSection(title: "Device Condition & Protection") {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.seal.fill")
+                        .foregroundColor(.green)
+                    Text("Thoroughly cleaned & professionally optimized")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Toggle(isOn: $addProtectionPlan) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Accidental Damage Protection")
+                            .font(.subheadline)
+                        Text("+$15. Covers drops, spills, and screen damage.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .tint(Color(hex: "0f3460"))
+            }
+            .padding(14)
             .background(Color(.systemBackground))
             .cornerRadius(12)
         }
